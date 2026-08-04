@@ -80,7 +80,7 @@ function MealPlanner() {
       diet_preference: diet,
       health_goal: goal,
       budget,
-      meal_plan: plan as unknown as Record<string, unknown>,
+      meal_plan: plan as unknown as never,
     });
     setBusy(false);
     if (error) {

@@ -17,7 +17,9 @@ import { Route as AwarenessRouteImport } from './routes/awareness'
 import { Route as HealthToolsRouteImport } from './routes/health-tools'
 import { Route as NutritionRouteImport } from './routes/nutrition'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
+import { Route as AuthenticatedAssessmentRouteImport } from './routes/_authenticated/assessment'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
+import { Route as AuthenticatedMealPlannerRouteImport } from './routes/_authenticated/meal-planner'
 import { Route as AuthenticatedProfileRouteImport } from './routes/_authenticated/profile'
 
 const IndexRoute = IndexRouteImport.update({
@@ -59,11 +61,22 @@ const ResetPasswordRoute = ResetPasswordRouteImport.update({
   path: '/reset-password',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedAssessmentRoute = AuthenticatedAssessmentRouteImport.update({
+  id: '/assessment',
+  path: '/assessment',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedMealPlannerRoute =
+  AuthenticatedMealPlannerRouteImport.update({
+    id: '/meal-planner',
+    path: '/meal-planner',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedProfileRoute = AuthenticatedProfileRouteImport.update({
   id: '/profile',
   path: '/profile',
@@ -78,7 +91,9 @@ export interface FileRoutesByFullPath {
   '/health-tools': typeof HealthToolsRoute
   '/nutrition': typeof NutritionRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/assessment': typeof AuthenticatedAssessmentRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
+  '/meal-planner': typeof AuthenticatedMealPlannerRoute
   '/profile': typeof AuthenticatedProfileRoute
 }
 export interface FileRoutesByTo {
@@ -89,7 +104,9 @@ export interface FileRoutesByTo {
   '/health-tools': typeof HealthToolsRoute
   '/nutrition': typeof NutritionRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/assessment': typeof AuthenticatedAssessmentRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
+  '/meal-planner': typeof AuthenticatedMealPlannerRoute
   '/profile': typeof AuthenticatedProfileRoute
 }
 export interface FileRoutesById {
@@ -102,7 +119,9 @@ export interface FileRoutesById {
   '/health-tools': typeof HealthToolsRoute
   '/nutrition': typeof NutritionRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/_authenticated/assessment': typeof AuthenticatedAssessmentRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
+  '/_authenticated/meal-planner': typeof AuthenticatedMealPlannerRoute
   '/_authenticated/profile': typeof AuthenticatedProfileRoute
 }
 export interface FileRouteTypes {
@@ -115,7 +134,9 @@ export interface FileRouteTypes {
     | '/health-tools'
     | '/nutrition'
     | '/reset-password'
+    | '/assessment'
     | '/dashboard'
+    | '/meal-planner'
     | '/profile'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -126,7 +147,9 @@ export interface FileRouteTypes {
     | '/health-tools'
     | '/nutrition'
     | '/reset-password'
+    | '/assessment'
     | '/dashboard'
+    | '/meal-planner'
     | '/profile'
   id:
     | '__root__'
@@ -138,7 +161,9 @@ export interface FileRouteTypes {
     | '/health-tools'
     | '/nutrition'
     | '/reset-password'
+    | '/_authenticated/assessment'
     | '/_authenticated/dashboard'
+    | '/_authenticated/meal-planner'
     | '/_authenticated/profile'
   fileRoutesById: FileRoutesById
 }
@@ -211,11 +236,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ResetPasswordRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/assessment': {
+      id: '/_authenticated/assessment'
+      path: '/assessment'
+      fullPath: '/assessment'
+      preLoaderRoute: typeof AuthenticatedAssessmentRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/dashboard': {
       id: '/_authenticated/dashboard'
       path: '/dashboard'
       fullPath: '/dashboard'
       preLoaderRoute: typeof AuthenticatedDashboardRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/meal-planner': {
+      id: '/_authenticated/meal-planner'
+      path: '/meal-planner'
+      fullPath: '/meal-planner'
+      preLoaderRoute: typeof AuthenticatedMealPlannerRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/profile': {
@@ -229,12 +268,16 @@ declare module '@tanstack/react-router' {
 }
 
 interface AuthenticatedRouteRouteChildren {
+  AuthenticatedAssessmentRoute: typeof AuthenticatedAssessmentRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
+  AuthenticatedMealPlannerRoute: typeof AuthenticatedMealPlannerRoute
   AuthenticatedProfileRoute: typeof AuthenticatedProfileRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedAssessmentRoute: AuthenticatedAssessmentRoute,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
+  AuthenticatedMealPlannerRoute: AuthenticatedMealPlannerRoute,
   AuthenticatedProfileRoute: AuthenticatedProfileRoute,
 }
 

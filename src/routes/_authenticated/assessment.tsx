@@ -90,8 +90,8 @@ function AssessmentPage() {
     const [{ error: aErr }] = await Promise.all([
       supabase.from("health_assessments").insert({
         user_id: user.id,
-        assessment_data: form as unknown as Record<string, unknown>,
-        wellness_summary: result as unknown as Record<string, unknown>,
+        assessment_data: form as unknown as never,
+        wellness_summary: result as unknown as never,
       }),
       supabase.from("bmi_records").insert({
         user_id: user.id,
