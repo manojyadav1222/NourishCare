@@ -17,11 +17,13 @@ import { Route as AwarenessRouteImport } from './routes/awareness'
 import { Route as HealthToolsRouteImport } from './routes/health-tools'
 import { Route as NutritionRouteImport } from './routes/nutrition'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
+import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
 import { Route as AuthenticatedAssessmentRouteImport } from './routes/_authenticated/assessment'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedHabitsRouteImport } from './routes/_authenticated/habits'
 import { Route as AuthenticatedMealPlannerRouteImport } from './routes/_authenticated/meal-planner'
 import { Route as AuthenticatedProfileRouteImport } from './routes/_authenticated/profile'
+import { Route as AuthenticatedProgressRouteImport } from './routes/_authenticated/progress'
 import { Route as AuthenticatedWaterRouteImport } from './routes/_authenticated/water'
 
 const IndexRoute = IndexRouteImport.update({
@@ -63,6 +65,11 @@ const ResetPasswordRoute = ResetPasswordRouteImport.update({
   path: '/reset-password',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedAssessmentRoute = AuthenticatedAssessmentRouteImport.update({
   id: '/assessment',
   path: '/assessment',
@@ -89,6 +96,11 @@ const AuthenticatedProfileRoute = AuthenticatedProfileRouteImport.update({
   path: '/profile',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedProgressRoute = AuthenticatedProgressRouteImport.update({
+  id: '/progress',
+  path: '/progress',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedWaterRoute = AuthenticatedWaterRouteImport.update({
   id: '/water',
   path: '/water',
@@ -103,11 +115,13 @@ export interface FileRoutesByFullPath {
   '/health-tools': typeof HealthToolsRoute
   '/nutrition': typeof NutritionRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/admin': typeof AuthenticatedAdminRoute
   '/assessment': typeof AuthenticatedAssessmentRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/habits': typeof AuthenticatedHabitsRoute
   '/meal-planner': typeof AuthenticatedMealPlannerRoute
   '/profile': typeof AuthenticatedProfileRoute
+  '/progress': typeof AuthenticatedProgressRoute
   '/water': typeof AuthenticatedWaterRoute
 }
 export interface FileRoutesByTo {
@@ -118,11 +132,13 @@ export interface FileRoutesByTo {
   '/health-tools': typeof HealthToolsRoute
   '/nutrition': typeof NutritionRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/admin': typeof AuthenticatedAdminRoute
   '/assessment': typeof AuthenticatedAssessmentRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/habits': typeof AuthenticatedHabitsRoute
   '/meal-planner': typeof AuthenticatedMealPlannerRoute
   '/profile': typeof AuthenticatedProfileRoute
+  '/progress': typeof AuthenticatedProgressRoute
   '/water': typeof AuthenticatedWaterRoute
 }
 export interface FileRoutesById {
@@ -135,11 +151,13 @@ export interface FileRoutesById {
   '/health-tools': typeof HealthToolsRoute
   '/nutrition': typeof NutritionRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/_authenticated/admin': typeof AuthenticatedAdminRoute
   '/_authenticated/assessment': typeof AuthenticatedAssessmentRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/habits': typeof AuthenticatedHabitsRoute
   '/_authenticated/meal-planner': typeof AuthenticatedMealPlannerRoute
   '/_authenticated/profile': typeof AuthenticatedProfileRoute
+  '/_authenticated/progress': typeof AuthenticatedProgressRoute
   '/_authenticated/water': typeof AuthenticatedWaterRoute
 }
 export interface FileRouteTypes {
@@ -152,11 +170,13 @@ export interface FileRouteTypes {
     | '/health-tools'
     | '/nutrition'
     | '/reset-password'
+    | '/admin'
     | '/assessment'
     | '/dashboard'
     | '/habits'
     | '/meal-planner'
     | '/profile'
+    | '/progress'
     | '/water'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -167,11 +187,13 @@ export interface FileRouteTypes {
     | '/health-tools'
     | '/nutrition'
     | '/reset-password'
+    | '/admin'
     | '/assessment'
     | '/dashboard'
     | '/habits'
     | '/meal-planner'
     | '/profile'
+    | '/progress'
     | '/water'
   id:
     | '__root__'
@@ -183,11 +205,13 @@ export interface FileRouteTypes {
     | '/health-tools'
     | '/nutrition'
     | '/reset-password'
+    | '/_authenticated/admin'
     | '/_authenticated/assessment'
     | '/_authenticated/dashboard'
     | '/_authenticated/habits'
     | '/_authenticated/meal-planner'
     | '/_authenticated/profile'
+    | '/_authenticated/progress'
     | '/_authenticated/water'
   fileRoutesById: FileRoutesById
 }
@@ -260,6 +284,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ResetPasswordRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/admin': {
+      id: '/_authenticated/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AuthenticatedAdminRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/assessment': {
       id: '/_authenticated/assessment'
       path: '/assessment'
@@ -295,6 +326,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedProfileRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/progress': {
+      id: '/_authenticated/progress'
+      path: '/progress'
+      fullPath: '/progress'
+      preLoaderRoute: typeof AuthenticatedProgressRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/water': {
       id: '/_authenticated/water'
       path: '/water'
@@ -306,20 +344,24 @@ declare module '@tanstack/react-router' {
 }
 
 interface AuthenticatedRouteRouteChildren {
+  AuthenticatedAdminRoute: typeof AuthenticatedAdminRoute
   AuthenticatedAssessmentRoute: typeof AuthenticatedAssessmentRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedHabitsRoute: typeof AuthenticatedHabitsRoute
   AuthenticatedMealPlannerRoute: typeof AuthenticatedMealPlannerRoute
   AuthenticatedProfileRoute: typeof AuthenticatedProfileRoute
+  AuthenticatedProgressRoute: typeof AuthenticatedProgressRoute
   AuthenticatedWaterRoute: typeof AuthenticatedWaterRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedAdminRoute: AuthenticatedAdminRoute,
   AuthenticatedAssessmentRoute: AuthenticatedAssessmentRoute,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedHabitsRoute: AuthenticatedHabitsRoute,
   AuthenticatedMealPlannerRoute: AuthenticatedMealPlannerRoute,
   AuthenticatedProfileRoute: AuthenticatedProfileRoute,
+  AuthenticatedProgressRoute: AuthenticatedProgressRoute,
   AuthenticatedWaterRoute: AuthenticatedWaterRoute,
 }
 
