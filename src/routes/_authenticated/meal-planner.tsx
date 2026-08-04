@@ -43,7 +43,7 @@ export const Route = createFileRoute("/_authenticated/meal-planner")({
       },
     ],
   }),
-  component: MealPlanner;
+  component: MealPlanner,
 });
 
 function MealPlanner() {
