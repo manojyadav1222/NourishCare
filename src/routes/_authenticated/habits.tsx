@@ -5,7 +5,7 @@ import { toast } from "sonner";
 import { AppShell } from "@/components/app/AppShell";
 import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { supabase } from "@/integrations/supabase/client";
+import { habitsApi } from "@/lib/api";
 import { useAuth } from "@/hooks/useAuth";
 import { DEFAULT_HABITS } from "@/lib/nutrition";
 import { cn } from "@/lib/utils";
@@ -36,11 +36,8 @@ function Habits() {
     enabled: Boolean(user),
     queryFn: async () => {
       const since = new Date(Date.now() - 6 * 86400000).toISOString().slice(0, 10);
-      const { data } = await supabase
-        .from("habit_logs")
-        .select("habit_name, completed, date")
-        .gte("date", since);
-      return data ?? [];
+      const { records } = await habitsApi.list(since);
+      return records;
     },
   });
 
@@ -52,13 +49,9 @@ function Habits() {
   async function toggle(name: string) {
     if (!user) return;
     const next = !done(name);
-    const { error } = await supabase
-      .from("habit_logs")
-      .upsert(
-        { user_id: user.id, habit_name: name, date: today(), completed: next },
-        { onConflict: "user_id,habit_name,date" },
-      );
-    if (error) {
+    try {
+      await habitsApi.save({ habit_name: name, date: today(), completed: next });
+    } catch {
       toast.error("Could not update that habit.");
       return;
     }

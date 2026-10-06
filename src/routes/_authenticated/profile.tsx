@@ -15,7 +15,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { supabase } from "@/integrations/supabase/client";
+import { profileApi } from "@/lib/api";
 import { useAuth } from "@/hooks/useAuth";
 
 export const Route = createFileRoute("/_authenticated/profile")({
@@ -49,25 +49,29 @@ function ProfilePage() {
       return v === null || v === "" ? null : Number(v);
     };
     setBusy(true);
-    const { error } = await supabase
-      .from("profiles")
-      .update({
-        full_name: String(f.get("full_name") ?? "").trim().slice(0, 100),
+    try {
+      await profileApi.update({
+        full_name: String(f.get("full_name") ?? "")
+          .trim()
+          .slice(0, 100),
         age: num("age"),
         gender: (f.get("gender") as string) || null,
-        phone: String(f.get("phone") ?? "").trim().slice(0, 20) || null,
+        phone:
+          String(f.get("phone") ?? "")
+            .trim()
+            .slice(0, 20) || null,
         height: num("height"),
         weight: num("weight"),
         diet_preference: diet || null,
         health_goal: goal || null,
         water_goal: num("water_goal") ?? 8,
-      })
-      .eq("user_id", user.id);
-    setBusy(false);
-    if (error) {
+      });
+    } catch {
       toast.error("Could not save your profile. Please try again.");
+      setBusy(false);
       return;
     }
+    setBusy(false);
     await refreshProfile();
     void qc.invalidateQueries();
     toast.success("Profile updated.");

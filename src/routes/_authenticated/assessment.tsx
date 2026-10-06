@@ -12,7 +12,7 @@ import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Checkbox } from "@/components/ui/checkbox";
-import { supabase } from "@/integrations/supabase/client";
+import { assessmentsApi, bmiApi, profileApi } from "@/lib/api";
 import { useAuth } from "@/hooks/useAuth";
 import {
   ASSESSMENT_OPTIONS,
@@ -76,7 +76,14 @@ function AssessmentPage() {
   const stepValid = (() => {
     if (step === 0) return form.age > 0 && form.height >= 50 && form.weight >= 10 && !!form.gender;
     if (step === 1)
-      return !!form.meals && !!form.fruits && !!form.vegetables && !!form.protein && !!form.processed && !!form.sugary;
+      return (
+        !!form.meals &&
+        !!form.fruits &&
+        !!form.vegetables &&
+        !!form.protein &&
+        !!form.processed &&
+        !!form.sugary
+      );
     if (step === 2) return !!form.water && !!form.exercise && !!form.sleep;
     return true;
   })();
@@ -87,35 +94,26 @@ function AssessmentPage() {
     const result = buildWellnessSummary(form);
     const bmi = calculateBmi(form.height, form.weight);
 
-    const [{ error: aErr }] = await Promise.all([
-      supabase.from("health_assessments").insert({
-        user_id: user.id,
-        assessment_data: form as unknown as never,
-        wellness_summary: result as unknown as never,
-      }),
-      supabase.from("bmi_records").insert({
-        user_id: user.id,
-        height: form.height,
-        weight: form.weight,
-        bmi,
-        category: bmiCategory(bmi),
-      }),
-      supabase
-        .from("profiles")
-        .update({
+    try {
+      await Promise.all([
+        assessmentsApi.create({
+          assessment_data: form,
+          wellness_summary: result,
+        }),
+        bmiApi.create({ height: form.height, weight: form.weight }),
+        profileApi.update({
           age: form.age,
           gender: form.gender,
           height: form.height,
           weight: form.weight,
-        })
-        .eq("user_id", user.id),
-    ]);
-
-    setBusy(false);
-    if (aErr) {
+        }),
+      ]);
+    } catch {
       toast.error("Could not save your assessment. Please try again.");
+      setBusy(false);
       return;
     }
+    setBusy(false);
     await refreshProfile();
     void qc.invalidateQueries();
     setSummary(result);
@@ -349,11 +347,7 @@ function AssessmentPage() {
                 Back
               </Button>
               {step < STEPS.length - 1 ? (
-                <Button
-                  variant="hero"
-                  onClick={() => setStep((s) => s + 1)}
-                  disabled={!stepValid}
-                >
+                <Button variant="hero" onClick={() => setStep((s) => s + 1)} disabled={!stepValid}>
                   Continue
                 </Button>
               ) : (

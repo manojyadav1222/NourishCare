@@ -109,13 +109,7 @@ export function TopicGrid({ onOpen }: { onOpen: (t: Topic) => void }) {
   );
 }
 
-export function TopicDialog({
-  topic,
-  onClose,
-}: {
-  topic: Topic | null;
-  onClose: () => void;
-}) {
+export function TopicDialog({ topic, onClose }: { topic: Topic | null; onClose: () => void }) {
   return (
     <Dialog open={Boolean(topic)} onOpenChange={(o) => !o && onClose()}>
       <DialogContent className="max-h-[85vh] overflow-y-auto rounded-3xl sm:max-w-lg">
@@ -156,8 +150,8 @@ function NutritionCenter() {
               Understand what your food actually does.
             </h1>
             <p className="mt-5 max-w-2xl text-base leading-relaxed text-muted-foreground">
-              Short, practical explanations of the nutrients and everyday practices that matter
-              most — written for real kitchens and real budgets.
+              Short, practical explanations of the nutrients and everyday practices that matter most
+              — written for real kitchens and real budgets.
             </p>
           </div>
         </div>

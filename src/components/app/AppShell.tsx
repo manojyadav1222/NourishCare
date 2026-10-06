@@ -9,7 +9,9 @@ import {
   ListChecks,
   LogOut,
   Menu,
+  ReceiptText,
   Shield,
+  ShoppingBasket,
   User,
   Utensils,
   X,
@@ -25,6 +27,8 @@ const NAV = [
   { to: "/habits", label: "Habits", icon: ListChecks },
   { to: "/water", label: "Water", icon: Droplet },
   { to: "/progress", label: "Progress", icon: LineChart },
+  { to: "/market", label: "Market", icon: ShoppingBasket },
+  { to: "/orders", label: "Saved Lists", icon: ReceiptText },
   { to: "/profile", label: "Profile", icon: User },
 ] as const;
 
@@ -47,9 +51,7 @@ export function AppShell({
     void navigate({ to: "/", replace: true });
   }
 
-  const items = isAdmin
-    ? [...NAV, { to: "/admin", label: "Admin", icon: Shield } as const]
-    : NAV;
+  const items = isAdmin ? [...NAV, { to: "/admin", label: "Admin", icon: Shield } as const] : NAV;
 
   return (
     <div className="min-h-screen bg-secondary/40">
@@ -70,11 +72,7 @@ export function AppShell({
               Sign out
             </Button>
           </div>
-          <button
-            className="md:hidden"
-            aria-label="Toggle menu"
-            onClick={() => setOpen((v) => !v)}
-          >
+          <button className="md:hidden" aria-label="Toggle menu" onClick={() => setOpen((v) => !v)}>
             {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
           </button>
         </div>

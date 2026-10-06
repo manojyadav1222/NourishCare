@@ -167,9 +167,7 @@ export function buildWellnessSummary(data: AssessmentData): WellnessSummary {
     ),
   );
 
-  const reported = data.conditions.filter(
-    (c) => c !== "None" && c !== "Prefer not to say",
-  );
+  const reported = data.conditions.filter((c) => c !== "None" && c !== "Prefer not to say");
 
   return {
     nutritionStatus: `${category} range (BMI ${bmi})`,
@@ -188,10 +186,7 @@ export function buildWellnessSummary(data: AssessmentData): WellnessSummary {
 
 export type DietPreference = "Vegetarian" | "Non-Vegetarian" | "Vegan";
 export type HealthGoal =
-  | "Balanced Nutrition"
-  | "Weight Management"
-  | "Improve Protein Intake"
-  | "General Healthy Eating";
+  "Balanced Nutrition" | "Weight Management" | "Improve Protein Intake" | "General Healthy Eating";
 export type Budget = "Low" | "Medium" | "Flexible";
 
 export type Meal = { slot: string; items: string[]; note: string; kcal: number };
@@ -249,11 +244,7 @@ const BASE: Record<DietPreference, Pool> = {
       "Rice, fish curry, vegetable poriyal and curd",
       "Rice, dal, mixed vegetables and curd",
     ],
-    "Evening Snack": [
-      "Sprouts chaat",
-      "Roasted chana",
-      "Boiled egg with black pepper",
-    ],
+    "Evening Snack": ["Sprouts chaat", "Roasted chana", "Boiled egg with black pepper"],
     Dinner: [
       "2 roti with chicken / soya curry and salad",
       "Vegetable khichdi with curd",
@@ -555,19 +546,71 @@ export const NUTRITION_TOPICS: Topic[] = [
 ];
 
 export const AWARENESS_TOPICS = [
-  { title: "Healthy Eating", icon: "salad", text: "Build every plate around whole grains, pulses, vegetables and fruit. Cooking at home gives you control over oil, salt and sugar." },
-  { title: "Iron-Rich Foods", icon: "flame", text: "Leafy greens, ragi, jaggery, sesame and pulses supply iron. Pair them with lemon, guava or amla to improve absorption." },
-  { title: "Protein-Rich Foods", icon: "egg", text: "Dal, chana, sprouts, curd, milk, peanuts, eggs and small fish are affordable protein sources for daily meals." },
-  { title: "Nutrition for Women", icon: "heart", text: "Iron, calcium and adequate protein matter across life stages. Needs change in pregnancy — seek professional guidance." },
-  { title: "Nutrition for Children", icon: "baby", text: "Small frequent meals, home-made snacks and involving children in cooking builds lasting healthy habits." },
-  { title: "Older Adults", icon: "users", text: "Soft, nutrient-dense meals, enough protein and calcium, and steady hydration support strength and digestion." },
-  { title: "Reducing Excess Sugar", icon: "candy-off", text: "Most added sugar comes from drinks and packaged snacks. Reduce gradually and choose whole fruit over juice." },
-  { title: "Reducing Excess Salt", icon: "soup", text: "Limit pickles, papads and packaged snacks. Build flavour with herbs, lemon, garlic and roasted spices instead." },
-  { title: "Food Hygiene", icon: "hand", text: "Wash hands, rinse produce, separate raw and cooked food, and cook thoroughly to prevent foodborne illness." },
-  { title: "Safe Food Storage", icon: "refrigerator", text: "Cool and refrigerate cooked food within two hours, use airtight containers, and discard anything that smells off." },
-  { title: "Physical Activity", icon: "activity", text: "About 150 minutes of moderate activity a week supports heart health, sleep and mood. Walking counts." },
-  { title: "Stress Management", icon: "brain", text: "Ongoing stress affects eating patterns. Regular routine, movement, time outdoors and support from others all help." },
-  { title: "Sleep Hygiene", icon: "moon", text: "Seven to nine hours supports appetite balance. Keep consistent timings and reduce screens before bed." },
+  {
+    title: "Healthy Eating",
+    icon: "salad",
+    text: "Build every plate around whole grains, pulses, vegetables and fruit. Cooking at home gives you control over oil, salt and sugar.",
+  },
+  {
+    title: "Iron-Rich Foods",
+    icon: "flame",
+    text: "Leafy greens, ragi, jaggery, sesame and pulses supply iron. Pair them with lemon, guava or amla to improve absorption.",
+  },
+  {
+    title: "Protein-Rich Foods",
+    icon: "egg",
+    text: "Dal, chana, sprouts, curd, milk, peanuts, eggs and small fish are affordable protein sources for daily meals.",
+  },
+  {
+    title: "Nutrition for Women",
+    icon: "heart",
+    text: "Iron, calcium and adequate protein matter across life stages. Needs change in pregnancy — seek professional guidance.",
+  },
+  {
+    title: "Nutrition for Children",
+    icon: "baby",
+    text: "Small frequent meals, home-made snacks and involving children in cooking builds lasting healthy habits.",
+  },
+  {
+    title: "Older Adults",
+    icon: "users",
+    text: "Soft, nutrient-dense meals, enough protein and calcium, and steady hydration support strength and digestion.",
+  },
+  {
+    title: "Reducing Excess Sugar",
+    icon: "candy-off",
+    text: "Most added sugar comes from drinks and packaged snacks. Reduce gradually and choose whole fruit over juice.",
+  },
+  {
+    title: "Reducing Excess Salt",
+    icon: "soup",
+    text: "Limit pickles, papads and packaged snacks. Build flavour with herbs, lemon, garlic and roasted spices instead.",
+  },
+  {
+    title: "Food Hygiene",
+    icon: "hand",
+    text: "Wash hands, rinse produce, separate raw and cooked food, and cook thoroughly to prevent foodborne illness.",
+  },
+  {
+    title: "Safe Food Storage",
+    icon: "refrigerator",
+    text: "Cool and refrigerate cooked food within two hours, use airtight containers, and discard anything that smells off.",
+  },
+  {
+    title: "Physical Activity",
+    icon: "activity",
+    text: "About 150 minutes of moderate activity a week supports heart health, sleep and mood. Walking counts.",
+  },
+  {
+    title: "Stress Management",
+    icon: "brain",
+    text: "Ongoing stress affects eating patterns. Regular routine, movement, time outdoors and support from others all help.",
+  },
+  {
+    title: "Sleep Hygiene",
+    icon: "moon",
+    text: "Seven to nine hours supports appetite balance. Keep consistent timings and reduce screens before bed.",
+  },
 ];
 
 export function greeting(date = new Date()): string {

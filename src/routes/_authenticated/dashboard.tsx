@@ -1,19 +1,12 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import {
-  ArrowRight,
-  ClipboardList,
-  Droplet,
-  ListChecks,
-  Scale,
-  Utensils,
-} from "lucide-react";
+import { ArrowRight, ClipboardList, Droplet, ListChecks, Scale, Utensils } from "lucide-react";
 import { AppShell } from "@/components/app/AppShell";
 import { Disclaimer } from "@/components/site/Disclaimer";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { supabase } from "@/integrations/supabase/client";
+import { assessmentsApi, bmiApi, contentApi, habitsApi, mealPlansApi, waterApi } from "@/lib/api";
 import { useAuth } from "@/hooks/useAuth";
 import { DEFAULT_HABITS, HEALTH_DISCLAIMER } from "@/lib/nutrition";
 
@@ -46,30 +39,22 @@ function Dashboard() {
     enabled: Boolean(uid),
     queryFn: async () => {
       const d = today();
-      const [bmi, assessment, habits, water, tip] = await Promise.all([
-        supabase
-          .from("bmi_records")
-          .select("*")
-          .order("created_at", { ascending: false })
-          .limit(1)
-          .maybeSingle(),
-        supabase
-          .from("health_assessments")
-          .select("*")
-          .order("created_at", { ascending: false })
-          .limit(1)
-          .maybeSingle(),
-        supabase.from("habit_logs").select("habit_name, completed").eq("date", d),
-        supabase.from("water_logs").select("amount, goal").eq("date", d).maybeSingle(),
-        supabase.from("nutrition_tips").select("title, content").limit(20),
+      const [bmi, assessment, habits, water, tip, mealPlan] = await Promise.all([
+        bmiApi.list(),
+        assessmentsApi.list(),
+        habitsApi.list(d),
+        waterApi.list(d),
+        contentApi.tips(),
+        mealPlansApi.list(),
       ]);
-      const tips = tip.data ?? [];
+      const tips = tip.records ?? [];
       return {
-        bmi: bmi.data,
-        assessment: assessment.data,
-        habitsDone: (habits.data ?? []).filter((h) => h.completed).length,
-        water: water.data,
+        bmi: bmi.records[0] ?? null,
+        assessment: assessment.records[0] ?? null,
+        habitsDone: (habits.records ?? []).filter((h) => h.date === d && h.completed).length,
+        water: (water.records ?? []).find((w) => w.date === d) ?? null,
         tip: tips.length ? tips[Math.floor(Math.random() * tips.length)] : null,
+        mealPlan: mealPlan.records[0] ?? null,
       };
     },
   });
@@ -143,6 +128,7 @@ function Dashboard() {
               <QuickLink to="/meal-planner" icon={Utensils} label="Generate a meal plan" />
               <QuickLink to="/habits" icon={ListChecks} label="Log today's habits" />
               <QuickLink to="/water" icon={Droplet} label="Track water intake" />
+              <QuickLink to="/health-tools" icon={Scale} label="Calculate BMI" />
             </div>
           </CardContent>
         </Card>
@@ -160,6 +146,32 @@ function Dashboard() {
                 {data?.tip?.content ??
                   "Different coloured vegetables and fruit supply different vitamins — variety across the week does most of the work."}
               </p>
+            </CardContent>
+          </Card>
+
+          <Card className="rounded-3xl border-border shadow-soft">
+            <CardContent className="p-7">
+              <h3 className="text-base font-semibold">Latest meal plan</h3>
+              {data?.mealPlan ? (
+                <>
+                  <p className="mt-2 text-sm text-muted-foreground">
+                    {data.mealPlan.diet_preference} · {data.mealPlan.health_goal} ·{" "}
+                    {data.mealPlan.budget} budget
+                  </p>
+                  <Button asChild variant="soft" size="sm" className="mt-5 w-full">
+                    <Link to="/meal-planner">View saved plans</Link>
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <p className="mt-2 text-sm text-muted-foreground">
+                    No meal plan saved yet. Generate one that matches your diet, goal and budget.
+                  </p>
+                  <Button asChild variant="soft" size="sm" className="mt-5 w-full">
+                    <Link to="/meal-planner">Generate meal plan</Link>
+                  </Button>
+                </>
+              )}
             </CardContent>
           </Card>
 
@@ -226,7 +238,7 @@ function QuickLink({
   icon: Icon,
   label,
 }: {
-  to: "/assessment" | "/meal-planner" | "/habits" | "/water";
+  to: "/assessment" | "/meal-planner" | "/habits" | "/water" | "/health-tools";
   icon: React.ComponentType<{ className?: string }>;
   label: string;
 }) {

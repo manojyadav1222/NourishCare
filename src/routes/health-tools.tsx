@@ -1,12 +1,16 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   ClipboardList,
   Droplet,
   LineChart,
   ListChecks,
+  Loader2,
   Scale,
   Utensils,
 } from "lucide-react";
+import { useState } from "react";
+import { toast } from "sonner";
 import { SiteNav } from "@/components/site/SiteNav";
 import { SiteFooter } from "@/components/site/SiteFooter";
 import { Disclaimer } from "@/components/site/Disclaimer";
@@ -15,6 +19,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { BmiGauge, useBmiForm } from "@/components/health/BmiGauge";
+import { bmiApi } from "@/lib/api";
+import { useAuth } from "@/hooks/useAuth";
 import { BMI_DISCLAIMER } from "@/lib/nutrition";
 
 export const Route = createFileRoute("/health-tools")({
@@ -71,6 +77,40 @@ const TOOLS = [
 
 function HealthTools() {
   const { height, setHeight, weight, setWeight, error, result, compute } = useBmiForm();
+  const { user, refreshProfile } = useAuth();
+  const qc = useQueryClient();
+  const [saving, setSaving] = useState(false);
+
+  const { data: savedBmi } = useQuery({
+    queryKey: ["bmi-history", user?.id],
+    enabled: Boolean(user),
+    queryFn: async () => {
+      const { records } = await bmiApi.list();
+      return records.slice(0, 8);
+    },
+  });
+
+  async function saveBmi() {
+    if (!user) return;
+    const computed = compute();
+    if (!computed) return;
+
+    setSaving(true);
+    try {
+      await bmiApi.create({ height: computed.height, weight: computed.weight });
+    } catch {
+      toast.error("Could not save your BMI. Please try again.");
+      setSaving(false);
+      return;
+    }
+    setSaving(false);
+
+    await refreshProfile();
+    void qc.invalidateQueries({ queryKey: ["bmi-history", user.id] });
+    void qc.invalidateQueries({ queryKey: ["dashboard", user.id] });
+    void qc.invalidateQueries({ queryKey: ["progress", user.id] });
+    toast.success("BMI saved to your account.");
+  }
 
   return (
     <div className="min-h-screen bg-background">
@@ -154,11 +194,23 @@ function HealthTools() {
                     <div className="mt-6">
                       <BmiGauge bmi={result.bmi} />
                     </div>
-                    <Button asChild variant="soft" className="mt-6 w-full">
-                      <Link to="/auth" search={{ mode: "register" }}>
-                        Save this result to my account
-                      </Link>
-                    </Button>
+                    {user ? (
+                      <Button
+                        variant="soft"
+                        className="mt-6 w-full"
+                        onClick={saveBmi}
+                        disabled={saving}
+                      >
+                        {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
+                        Save this result
+                      </Button>
+                    ) : (
+                      <Button asChild variant="soft" className="mt-6 w-full">
+                        <Link to="/auth" search={{ mode: "register" }}>
+                          Save this result to my account
+                        </Link>
+                      </Button>
+                    )}
                   </>
                 ) : (
                   <div className="flex h-full flex-col items-center justify-center py-10 text-center">
@@ -175,6 +227,37 @@ function HealthTools() {
           <Disclaimer className="mt-6" title="About BMI">
             {BMI_DISCLAIMER}
           </Disclaimer>
+
+          {user ? (
+            <>
+              <h2 className="mt-16 text-xl font-semibold">BMI history</h2>
+              {savedBmi && savedBmi.length > 0 ? (
+                <div className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                  {savedBmi.map((record) => (
+                    <Card key={record.id} className="rounded-3xl border-border shadow-soft">
+                      <CardContent className="p-6">
+                        <p className="text-xs text-muted-foreground">
+                          {new Date(record.created_at).toLocaleDateString()}
+                        </p>
+                        <p className="mt-2 font-display text-3xl font-semibold text-primary">
+                          {record.bmi}
+                        </p>
+                        <p className="text-sm font-medium">{record.category}</p>
+                        <p className="mt-2 text-xs text-muted-foreground">
+                          {record.height} cm · {record.weight} kg
+                        </p>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              ) : (
+                <p className="mt-5 rounded-2xl border border-border bg-secondary/50 p-6 text-sm text-muted-foreground">
+                  No saved BMI records yet. Calculate your BMI above and save it to start your
+                  history.
+                </p>
+              )}
+            </>
+          ) : null}
 
           <h2 className="mt-16 text-xl font-semibold">More tools in your account</h2>
           <div className="mt-6 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">

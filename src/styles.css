@@ -5,11 +5,9 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme {
-  --font-sans:
-    "Plus Jakarta Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-sans: "Plus Jakarta Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
   --font-display: "Fraunces", ui-serif, Georgia, serif;
 }
-
 
 /*
  * Design system definition.
@@ -220,4 +218,3 @@
 @utility shadow-lift {
   box-shadow: var(--shadow-lift);
 }
-

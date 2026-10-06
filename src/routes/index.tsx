@@ -126,7 +126,7 @@ function Landing() {
             <div>
               <span className="inline-flex items-center gap-2 rounded-full border border-primary/25 bg-background/70 px-3.5 py-1.5 text-xs font-semibold text-primary">
                 <Sparkles className="h-3.5 w-3.5" />
-                Community Service Project
+                Stay Strong
               </span>
               <h1 className="mt-6 text-4xl font-semibold leading-[1.08] md:text-6xl">
                 Better Nutrition.
@@ -134,8 +134,8 @@ function Landing() {
                 Healthier Communities.
               </h1>
               <p className="mt-6 max-w-lg text-base leading-relaxed text-muted-foreground md:text-lg">
-                Understand your nutrition, build healthier habits, and receive personalized
-                guidance for a better lifestyle.
+                Understand your nutrition, build healthier habits, and receive personalized guidance
+                for a better lifestyle.
               </p>
               <div className="mt-8 flex flex-wrap gap-3">
                 <Button asChild variant="hero" size="lg">
@@ -179,7 +179,10 @@ function Landing() {
         </section>
 
         {/* Why nutrition matters */}
-        <Section eyebrow="Why nutrition matters" title="Good health starts on the plate, every single day.">
+        <Section
+          eyebrow="Why nutrition matters"
+          title="Good health starts on the plate, every single day."
+        >
           <div className="grid gap-6 md:grid-cols-3">
             {WHY.map((w) => (
               <Card key={w.title} className="rounded-3xl border-border shadow-soft">
@@ -195,10 +198,16 @@ function Landing() {
 
         {/* Services */}
         <div className="bg-secondary/40">
-          <Section eyebrow="Our services" title="Everything a household needs to eat and live better.">
+          <Section
+            eyebrow="Our services"
+            title="Everything a household needs to eat and live better."
+          >
             <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
               {SERVICES.map((s) => (
-                <Card key={s.title} className="rounded-3xl border-border bg-background shadow-soft transition-shadow hover:shadow-lift">
+                <Card
+                  key={s.title}
+                  className="rounded-3xl border-border bg-background shadow-soft transition-shadow hover:shadow-lift"
+                >
                   <CardContent className="p-7">
                     <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-accent text-accent-foreground">
                       <s.icon className="h-5 w-5" />
@@ -213,7 +222,10 @@ function Landing() {
         </div>
 
         {/* BMI & assessment */}
-        <Section eyebrow="BMI & health assessment" title="Know where you stand before you change anything.">
+        <Section
+          eyebrow="BMI & health assessment"
+          title="Know where you stand before you change anything."
+        >
           <div className="grid gap-10 md:grid-cols-2 md:items-center">
             <div className="space-y-4">
               {[
@@ -258,7 +270,10 @@ function Landing() {
 
         {/* Meal guidance */}
         <div className="bg-secondary/40">
-          <Section eyebrow="Personalized meal guidance" title="Affordable Indian meals, matched to your preference and budget.">
+          <Section
+            eyebrow="Personalized meal guidance"
+            title="Affordable Indian meals, matched to your preference and budget."
+          >
             <div className="grid gap-10 md:grid-cols-2 md:items-center">
               <img
                 src={foodsImage}
@@ -296,12 +311,19 @@ function Landing() {
         </div>
 
         {/* Awareness */}
-        <Section eyebrow="Nutrition awareness" title="Clear, practical knowledge for the whole household.">
+        <Section
+          eyebrow="Nutrition awareness"
+          title="Clear, practical knowledge for the whole household."
+        >
           <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
             {[
               { icon: Apple, t: "Balanced diets", d: "What a healthy plate actually looks like." },
               { icon: ShieldCheck, t: "Food hygiene", d: "Prepare and store food safely at home." },
-              { icon: Droplet, t: "Hydration", d: "How much water, and what to drink instead of soda." },
+              {
+                icon: Droplet,
+                t: "Hydration",
+                d: "How much water, and what to drink instead of soda.",
+              },
               { icon: Users, t: "Every life stage", d: "Women, children and older adults." },
             ].map((c) => (
               <Card key={c.t} className="rounded-3xl border-border shadow-soft">
@@ -325,7 +347,10 @@ function Landing() {
 
         {/* Habit tracking */}
         <div className="bg-secondary/40">
-          <Section eyebrow="Healthy habit tracking" title="Seven small habits, checked off one day at a time.">
+          <Section
+            eyebrow="Healthy habit tracking"
+            title="Seven small habits, checked off one day at a time."
+          >
             <div className="grid gap-8 md:grid-cols-2 md:items-center">
               <ul className="grid gap-3 sm:grid-cols-2">
                 {[
@@ -363,7 +388,10 @@ function Landing() {
         </div>
 
         {/* Community mission */}
-        <Section eyebrow="Community health mission" title="A student-led project for community health literacy.">
+        <Section
+          eyebrow="Community health mission"
+          title="A student-led project for community health literacy."
+        >
           <div className="grid gap-6 md:grid-cols-3">
             {[
               {
@@ -402,7 +430,12 @@ function Landing() {
                   Create free account
                 </Link>
               </Button>
-              <Button asChild size="lg" variant="ghost" className="text-primary-foreground hover:bg-primary-foreground/15">
+              <Button
+                asChild
+                size="lg"
+                variant="ghost"
+                className="text-primary-foreground hover:bg-primary-foreground/15"
+              >
                 <Link to="/auth" search={{ mode: "login" }}>
                   I already have an account
                 </Link>

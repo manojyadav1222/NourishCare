@@ -15,9 +15,9 @@ export function SiteFooter() {
               <span className="font-display text-xl font-semibold">NourishCare</span>
             </div>
             <p className="mt-4 max-w-md text-sm leading-relaxed text-muted-foreground">
-              A community service initiative for nutrition counseling, health awareness and
-              healthy lifestyle development — built for families with limited access to
-              structured nutritional guidance.
+              A community service initiative for nutrition counseling, health awareness and healthy
+              lifestyle development — built for families with limited access to structured
+              nutritional guidance.
             </p>
           </div>
 

@@ -15,7 +15,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { supabase } from "@/integrations/supabase/client";
+import { mealPlansApi } from "@/lib/api";
 import { useAuth } from "@/hooks/useAuth";
 import {
   FOOD_SWAPS,
@@ -63,30 +63,27 @@ function MealPlanner() {
     queryKey: ["meal-plans", user?.id],
     enabled: Boolean(user),
     queryFn: async () => {
-      const { data } = await supabase
-        .from("meal_plans")
-        .select("*")
-        .order("created_at", { ascending: false })
-        .limit(5);
-      return data ?? [];
+      const { records } = await mealPlansApi.list();
+      return records.slice(0, 5);
     },
   });
 
   async function handleSave() {
     if (!user || !plan) return;
     setBusy(true);
-    const { error } = await supabase.from("meal_plans").insert({
-      user_id: user.id,
-      diet_preference: diet,
-      health_goal: goal,
-      budget,
-      meal_plan: plan as unknown as never,
-    });
-    setBusy(false);
-    if (error) {
+    try {
+      await mealPlansApi.create({
+        diet_preference: diet,
+        health_goal: goal,
+        budget,
+        meal_plan: plan,
+      });
+    } catch {
       toast.error("Could not save the plan. Please try again.");
+      setBusy(false);
       return;
     }
+    setBusy(false);
     void qc.invalidateQueries({ queryKey: ["meal-plans", user.id] });
     toast.success("Meal plan saved to your account.");
   }
@@ -170,7 +167,9 @@ function MealPlanner() {
                     <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-accent text-accent-foreground">
                       <Utensils className="h-5 w-5" />
                     </span>
-                    <span className="text-xs font-medium text-muted-foreground">~{m.kcal} kcal</span>
+                    <span className="text-xs font-medium text-muted-foreground">
+                      ~{m.kcal} kcal
+                    </span>
                   </div>
                   <h3 className="mt-4 text-lg font-semibold">{m.slot}</h3>
                   <ul className="mt-3 space-y-2 text-sm leading-relaxed">

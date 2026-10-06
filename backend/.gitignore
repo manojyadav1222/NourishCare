@@ -1,0 +1,6 @@
+.env
+nourishcare.db
+*.db
+__pycache__/
+.venv/
+venv/

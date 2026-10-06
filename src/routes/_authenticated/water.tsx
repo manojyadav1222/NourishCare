@@ -6,7 +6,7 @@ import { AppShell } from "@/components/app/AppShell";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { supabase } from "@/integrations/supabase/client";
+import { waterApi } from "@/lib/api";
 import { useAuth } from "@/hooks/useAuth";
 
 export const Route = createFileRoute("/_authenticated/water")({
@@ -36,11 +36,8 @@ function Water() {
     enabled: Boolean(user),
     queryFn: async () => {
       const since = new Date(Date.now() - 6 * 86400000).toISOString().slice(0, 10);
-      const { data } = await supabase
-        .from("water_logs")
-        .select("amount, goal, date")
-        .gte("date", since);
-      return data ?? [];
+      const { records } = await waterApi.list(since);
+      return records;
     },
   });
 
@@ -51,13 +48,9 @@ function Water() {
   async function setAmount(next: number) {
     if (!user) return;
     const value = Math.max(0, Math.min(30, next));
-    const { error } = await supabase
-      .from("water_logs")
-      .upsert(
-        { user_id: user.id, date: today(), amount: value, goal },
-        { onConflict: "user_id,date" },
-      );
-    if (error) {
+    try {
+      await waterApi.save({ date: today(), amount: value, goal });
+    } catch {
       toast.error("Could not update your water log.");
       return;
     }

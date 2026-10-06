@@ -22,8 +22,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { supabase } from "@/integrations/supabase/client";
-import { lovable } from "@/integrations/lovable/index";
+import { authApi, ApiError } from "@/lib/api";
 import { useAuth } from "@/hooks/useAuth";
 
 const searchSchema = z.object({
@@ -67,16 +66,21 @@ const loginSchema = z.object({
   password: z.string().min(1, "Enter your password"),
 });
 
+function safeAuthErrorMessage(error: unknown) {
+  if (error instanceof ApiError) return error.message;
+  if (error instanceof Error) return error.message;
+  return "Authentication failed. Please try again.";
+}
+
 function AuthPage() {
   const { mode } = Route.useSearch();
   const navigate = useNavigate();
-  const { user, loading } = useAuth();
+  const { user, loading, setAuthenticatedUser } = useAuth();
   const [busy, setBusy] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [forgotOpen, setForgotOpen] = useState(false);
   const [forgotEmail, setForgotEmail] = useState("");
   const [gender, setGender] = useState("");
-  const [confirmSent, setConfirmSent] = useState(false);
 
   useEffect(() => {
     if (!loading && user) void navigate({ to: "/dashboard", replace: true });
@@ -95,18 +99,16 @@ function AuthPage() {
     }
     setErrors({});
     setBusy(true);
-    const { error } = await supabase.auth.signInWithPassword(parsed.data);
-    setBusy(false);
-    if (error) {
-      toast.error(
-        error.message.includes("Invalid login")
-          ? "Incorrect email or password."
-          : error.message,
-      );
-      return;
+    try {
+      const { user: loggedInUser } = await authApi.login(parsed.data);
+      setAuthenticatedUser(loggedInUser);
+      toast.success("Welcome back!");
+      void navigate({ to: "/dashboard" });
+    } catch (error) {
+      toast.error(safeAuthErrorMessage(error), { duration: 8000 });
+    } finally {
+      setBusy(false);
     }
-    toast.success("Welcome back!");
-    void navigate({ to: "/dashboard" });
   }
 
   async function handleRegister(e: React.FormEvent<HTMLFormElement>) {
@@ -126,49 +128,23 @@ function AuthPage() {
     }
     setErrors({});
     setBusy(true);
-    const { data, error } = await supabase.auth.signUp({
-      email: parsed.data.email,
-      password: parsed.data.password,
-      options: {
-        emailRedirectTo: `${window.location.origin}/dashboard`,
-        data: {
-          full_name: parsed.data.fullName,
-          age: String(parsed.data.age),
-          gender: parsed.data.gender,
-          phone: parsed.data.phone ?? "",
-        },
-      },
-    });
-    setBusy(false);
-    if (error) {
-      toast.error(
-        error.message.includes("already registered")
-          ? "That email is already registered. Try logging in instead."
-          : error.message,
-      );
-      return;
-    }
-    if (!data.session) {
-      setConfirmSent(true);
-      toast.success("Account created — check your email to confirm it.");
-      return;
-    }
-    toast.success("Account created!");
-    void navigate({ to: "/dashboard" });
-  }
-
-  async function handleGoogle() {
-    setBusy(true);
-    const result = await lovable.auth.signInWithOAuth("google", {
-      redirect_uri: window.location.origin,
-    });
-    if (result.error) {
+    try {
+      const { user: registeredUser } = await authApi.register({
+        full_name: parsed.data.fullName,
+        email: parsed.data.email,
+        password: parsed.data.password,
+        age: parsed.data.age,
+        gender: parsed.data.gender,
+        phone: parsed.data.phone ?? "",
+      });
+      setAuthenticatedUser(registeredUser);
+      toast.success("Account created!");
+      void navigate({ to: "/dashboard" });
+    } catch (error) {
+      toast.error(safeAuthErrorMessage(error));
+    } finally {
       setBusy(false);
-      toast.error("Google sign-in could not be started. Please try again.");
-      return;
     }
-    if (result.redirected) return;
-    void navigate({ to: "/dashboard" });
   }
 
   async function handleForgot() {
@@ -178,16 +154,20 @@ function AuthPage() {
       return;
     }
     setBusy(true);
-    const { error } = await supabase.auth.resetPasswordForEmail(parsed.data, {
-      redirectTo: `${window.location.origin}/reset-password`,
-    });
-    setBusy(false);
-    if (error) {
-      toast.error(error.message);
-      return;
+    try {
+      const result = await authApi.forgotPassword(parsed.data);
+      setForgotOpen(false);
+      if (result.reset_token) {
+        await navigate({ to: "/reset-password", search: { token: result.reset_token } });
+        toast.success("Demo reset token generated. Enter a new password.");
+      } else {
+        toast.success(result.message);
+      }
+    } catch (error) {
+      toast.error(safeAuthErrorMessage(error));
+    } finally {
+      setBusy(false);
     }
-    setForgotOpen(false);
-    toast.success("If that email is registered, a reset link is on its way.");
   }
 
   return (
@@ -223,175 +203,136 @@ function AuthPage() {
             <span className="font-display text-xl font-semibold">NourishCare</span>
           </Link>
 
-          {confirmSent ? (
-            <div className="rounded-3xl border border-border p-8 text-center shadow-soft">
-              <h2 className="text-xl font-semibold">Check your email</h2>
-              <p className="mt-3 text-sm text-muted-foreground">
-                We've sent a confirmation link to your inbox. Click it to activate your NourishCare
-                account, then come back and log in.
+          <Tabs
+            value={mode}
+            onValueChange={(v) =>
+              void navigate({ to: "/auth", search: { mode: v as "login" | "register" } })
+            }
+          >
+            <TabsList className="grid w-full grid-cols-2 rounded-full">
+              <TabsTrigger value="login" className="rounded-full">
+                Login
+              </TabsTrigger>
+              <TabsTrigger value="register" className="rounded-full">
+                Register
+              </TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="login" className="mt-8">
+              <h2 className="text-2xl font-semibold">Welcome back</h2>
+              <p className="mt-2 text-sm text-muted-foreground">
+                Log in to continue tracking your nutrition and habits.
               </p>
-              <Button
-                variant="soft"
-                className="mt-6"
-                onClick={() => {
-                  setConfirmSent(false);
-                  void navigate({ to: "/auth", search: { mode: "login" } });
-                }}
-              >
-                Back to login
-              </Button>
-            </div>
-          ) : (
-            <Tabs
-              value={mode}
-              onValueChange={(v) =>
-                void navigate({ to: "/auth", search: { mode: v as "login" | "register" } })
-              }
-            >
-              <TabsList className="grid w-full grid-cols-2 rounded-full">
-                <TabsTrigger value="login" className="rounded-full">
-                  Login
-                </TabsTrigger>
-                <TabsTrigger value="register" className="rounded-full">
-                  Register
-                </TabsTrigger>
-              </TabsList>
+              <form className="mt-6 space-y-4" onSubmit={handleLogin}>
+                <div className="space-y-2">
+                  <Label htmlFor="login-email">Email</Label>
+                  <Input id="login-email" name="email" type="email" autoComplete="email" required />
+                  {errors["email"] ? (
+                    <p className="text-xs text-destructive">{errors["email"]}</p>
+                  ) : null}
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="login-password">Password</Label>
+                  <Input
+                    id="login-password"
+                    name="password"
+                    type="password"
+                    autoComplete="current-password"
+                    required
+                  />
+                  {errors["password"] ? (
+                    <p className="text-xs text-destructive">{errors["password"]}</p>
+                  ) : null}
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setForgotOpen(true)}
+                  className="text-xs font-medium text-primary hover:underline"
+                >
+                  Forgot your password?
+                </button>
+                <Button type="submit" variant="hero" className="w-full" disabled={busy}>
+                  {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
+                  Log in
+                </Button>
+              </form>
+            </TabsContent>
 
-              <TabsContent value="login" className="mt-8">
-                <h2 className="text-2xl font-semibold">Welcome back</h2>
-                <p className="mt-2 text-sm text-muted-foreground">
-                  Log in to continue tracking your nutrition and habits.
-                </p>
-                <form className="mt-6 space-y-4" onSubmit={handleLogin}>
+            <TabsContent value="register" className="mt-8">
+              <h2 className="text-2xl font-semibold">Create your account</h2>
+              <p className="mt-2 text-sm text-muted-foreground">
+                It takes less than a minute and it's completely free.
+              </p>
+              <form className="mt-6 space-y-4" onSubmit={handleRegister}>
+                <div className="space-y-2">
+                  <Label htmlFor="fullName">Full name</Label>
+                  <Input id="fullName" name="fullName" autoComplete="name" required />
+                  {errors["fullName"] ? (
+                    <p className="text-xs text-destructive">{errors["fullName"]}</p>
+                  ) : null}
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="reg-email">Email</Label>
+                  <Input id="reg-email" name="email" type="email" autoComplete="email" required />
+                  {errors["email"] ? (
+                    <p className="text-xs text-destructive">{errors["email"]}</p>
+                  ) : null}
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="reg-password">Password</Label>
+                  <Input
+                    id="reg-password"
+                    name="password"
+                    type="password"
+                    autoComplete="new-password"
+                    required
+                  />
+                  {errors["password"] ? (
+                    <p className="text-xs text-destructive">{errors["password"]}</p>
+                  ) : (
+                    <p className="text-xs text-muted-foreground">At least 8 characters.</p>
+                  )}
+                </div>
+                <div className="grid gap-4 sm:grid-cols-2">
                   <div className="space-y-2">
-                    <Label htmlFor="login-email">Email</Label>
-                    <Input id="login-email" name="email" type="email" autoComplete="email" required />
-                    {errors["email"] ? (
-                      <p className="text-xs text-destructive">{errors["email"]}</p>
+                    <Label htmlFor="age">Age</Label>
+                    <Input id="age" name="age" type="number" min={1} max={120} required />
+                    {errors["age"] ? (
+                      <p className="text-xs text-destructive">{errors["age"]}</p>
                     ) : null}
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="login-password">Password</Label>
-                    <Input
-                      id="login-password"
-                      name="password"
-                      type="password"
-                      autoComplete="current-password"
-                      required
-                    />
-                    {errors["password"] ? (
-                      <p className="text-xs text-destructive">{errors["password"]}</p>
+                    <Label htmlFor="gender">Gender</Label>
+                    <Select value={gender} onValueChange={setGender}>
+                      <SelectTrigger id="gender">
+                        <SelectValue placeholder="Select" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="Female">Female</SelectItem>
+                        <SelectItem value="Male">Male</SelectItem>
+                        <SelectItem value="Other">Other</SelectItem>
+                        <SelectItem value="Prefer not to say">Prefer not to say</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    {errors["gender"] ? (
+                      <p className="text-xs text-destructive">{errors["gender"]}</p>
                     ) : null}
                   </div>
-                  <button
-                    type="button"
-                    onClick={() => setForgotOpen(true)}
-                    className="text-xs font-medium text-primary hover:underline"
-                  >
-                    Forgot your password?
-                  </button>
-                  <Button type="submit" variant="hero" className="w-full" disabled={busy}>
-                    {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
-                    Log in
-                  </Button>
-                </form>
-              </TabsContent>
-
-              <TabsContent value="register" className="mt-8">
-                <h2 className="text-2xl font-semibold">Create your account</h2>
-                <p className="mt-2 text-sm text-muted-foreground">
-                  It takes less than a minute and it's completely free.
-                </p>
-                <form className="mt-6 space-y-4" onSubmit={handleRegister}>
-                  <div className="space-y-2">
-                    <Label htmlFor="fullName">Full name</Label>
-                    <Input id="fullName" name="fullName" autoComplete="name" required />
-                    {errors["fullName"] ? (
-                      <p className="text-xs text-destructive">{errors["fullName"]}</p>
-                    ) : null}
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="reg-email">Email</Label>
-                    <Input id="reg-email" name="email" type="email" autoComplete="email" required />
-                    {errors["email"] ? (
-                      <p className="text-xs text-destructive">{errors["email"]}</p>
-                    ) : null}
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="reg-password">Password</Label>
-                    <Input
-                      id="reg-password"
-                      name="password"
-                      type="password"
-                      autoComplete="new-password"
-                      required
-                    />
-                    {errors["password"] ? (
-                      <p className="text-xs text-destructive">{errors["password"]}</p>
-                    ) : (
-                      <p className="text-xs text-muted-foreground">At least 8 characters.</p>
-                    )}
-                  </div>
-                  <div className="grid gap-4 sm:grid-cols-2">
-                    <div className="space-y-2">
-                      <Label htmlFor="age">Age</Label>
-                      <Input id="age" name="age" type="number" min={1} max={120} required />
-                      {errors["age"] ? (
-                        <p className="text-xs text-destructive">{errors["age"]}</p>
-                      ) : null}
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="gender">Gender</Label>
-                      <Select value={gender} onValueChange={setGender}>
-                        <SelectTrigger id="gender">
-                          <SelectValue placeholder="Select" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="Female">Female</SelectItem>
-                          <SelectItem value="Male">Male</SelectItem>
-                          <SelectItem value="Other">Other</SelectItem>
-                          <SelectItem value="Prefer not to say">Prefer not to say</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      {errors["gender"] ? (
-                        <p className="text-xs text-destructive">{errors["gender"]}</p>
-                      ) : null}
-                    </div>
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="phone">Phone number (optional)</Label>
-                    <Input id="phone" name="phone" type="tel" autoComplete="tel" />
-                    {errors["phone"] ? (
-                      <p className="text-xs text-destructive">{errors["phone"]}</p>
-                    ) : null}
-                  </div>
-                  <Button type="submit" variant="hero" className="w-full" disabled={busy}>
-                    {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
-                    Create account
-                  </Button>
-                </form>
-              </TabsContent>
-            </Tabs>
-          )}
-
-          {!confirmSent ? (
-            <>
-              <div className="my-6 flex items-center gap-4">
-                <span className="h-px flex-1 bg-border" />
-                <span className="text-xs text-muted-foreground">or</span>
-                <span className="h-px flex-1 bg-border" />
-              </div>
-              <Button
-                type="button"
-                variant="outline"
-                className="w-full"
-                onClick={handleGoogle}
-                disabled={busy}
-              >
-                Continue with Google
-              </Button>
-            </>
-          ) : null}
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="phone">Phone number (optional)</Label>
+                  <Input id="phone" name="phone" type="tel" autoComplete="tel" />
+                  {errors["phone"] ? (
+                    <p className="text-xs text-destructive">{errors["phone"]}</p>
+                  ) : null}
+                </div>
+                <Button type="submit" variant="hero" className="w-full" disabled={busy}>
+                  {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
+                  Create account
+                </Button>
+              </form>
+            </TabsContent>
+          </Tabs>
 
           <p className="mt-8 text-center text-xs text-muted-foreground">
             By continuing you agree that NourishCare provides general educational information only
@@ -405,7 +346,7 @@ function AuthPage() {
           <DialogHeader>
             <DialogTitle>Reset your password</DialogTitle>
             <DialogDescription>
-              Enter your account email and we'll send you a link to set a new password.
+              Enter your account email to generate a demo reset token for this local project.
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-2">

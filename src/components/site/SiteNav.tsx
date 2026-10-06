@@ -10,6 +10,7 @@ const LINKS = [
   { to: "/nutrition", label: "Nutrition" },
   { to: "/health-tools", label: "Health Tools" },
   { to: "/awareness", label: "Awareness" },
+  { to: "/market", label: "Market" },
   { to: "/about", label: "About" },
 ] as const;
 

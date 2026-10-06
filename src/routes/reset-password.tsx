@@ -6,9 +6,14 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { supabase } from "@/integrations/supabase/client";
+import { authApi } from "@/lib/api";
+
+const searchSchema = z.object({
+  token: z.string().catch(""),
+});
 
 export const Route = createFileRoute("/reset-password")({
+  validateSearch: searchSchema,
   head: () => ({
     meta: [
       { title: "Set a new password — NourishCare" },
@@ -22,7 +27,9 @@ export const Route = createFileRoute("/reset-password")({
 });
 
 function ResetPassword() {
+  const { token: initialToken } = Route.useSearch();
   const navigate = useNavigate();
+  const [token, setToken] = useState(initialToken);
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
   const [busy, setBusy] = useState(false);
@@ -41,18 +48,19 @@ function ResetPassword() {
     }
     setError(null);
     setBusy(true);
-    const { error: updateError } = await supabase.auth.updateUser({ password });
-    setBusy(false);
-    if (updateError) {
+    try {
+      await authApi.resetPassword(token, password);
+      toast.success("Password updated. You can log in now.");
+      void navigate({ to: "/auth", search: { mode: "login" } });
+    } catch (updateError) {
       toast.error(
-        updateError.message.includes("session")
-          ? "This reset link has expired. Please request a new one."
-          : updateError.message,
+        updateError instanceof Error
+          ? updateError.message
+          : "This reset token is invalid or expired.",
       );
-      return;
+    } finally {
+      setBusy(false);
     }
-    toast.success("Password updated. You're all set.");
-    void navigate({ to: "/dashboard" });
   }
 
   return (
@@ -67,10 +75,19 @@ function ResetPassword() {
 
         <h1 className="mt-8 text-2xl font-semibold">Set a new password</h1>
         <p className="mt-2 text-sm text-muted-foreground">
-          Choose a password you haven't used before.
+          Paste your demo reset token and choose a new password.
         </p>
 
         <form className="mt-6 space-y-4" onSubmit={handleSubmit}>
+          <div className="space-y-2">
+            <Label htmlFor="reset-token">Reset token</Label>
+            <Input
+              id="reset-token"
+              value={token}
+              onChange={(e) => setToken(e.target.value)}
+              required
+            />
+          </div>
           <div className="space-y-2">
             <Label htmlFor="new-password">New password</Label>
             <Input

@@ -1,88 +1,62 @@
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
-import type { Session, User } from "@supabase/supabase-js";
-import { supabase } from "@/integrations/supabase/client";
+import { authApi, clearToken, getToken, type ApiUser } from "@/lib/api";
 
-export type Profile = {
-  id: string;
-  user_id: string;
-  full_name: string;
-  age: number | null;
-  gender: string | null;
-  phone: string | null;
-  height: number | null;
-  weight: number | null;
-  diet_preference: string | null;
-  health_goal: string | null;
-  water_goal: number;
-};
+export type Profile = ApiUser;
+export type AuthUser = ApiUser;
 
 type AuthContextValue = {
-  user: User | null;
-  session: Session | null;
+  user: AuthUser | null;
+  session: { access_token: string } | null;
   profile: Profile | null;
   isAdmin: boolean;
   loading: boolean;
   refreshProfile: () => Promise<void>;
+  setAuthenticatedUser: (user: AuthUser) => void;
   signOut: () => Promise<void>;
 };
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [session, setSession] = useState<Session | null>(null);
-  const [profile, setProfile] = useState<Profile | null>(null);
-  const [isAdmin, setIsAdmin] = useState(false);
+  const [user, setUser] = useState<AuthUser | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const user = session?.user ?? null;
-
-  async function loadUserData(uid: string) {
-    const [{ data: p }, { data: roles }] = await Promise.all([
-      supabase.from("profiles").select("*").eq("user_id", uid).maybeSingle(),
-      supabase.from("user_roles").select("role").eq("user_id", uid),
-    ]);
-    setProfile((p as Profile | null) ?? null);
-    setIsAdmin(Boolean(roles?.some((r) => r.role === "admin")));
+  async function loadCurrentUser() {
+    const token = getToken();
+    if (!token) {
+      setUser(null);
+      return;
+    }
+    try {
+      const { user: currentUser } = await authApi.me();
+      setUser(currentUser);
+    } catch {
+      clearToken();
+      setUser(null);
+    }
   }
 
   useEffect(() => {
-    const { data: sub } = supabase.auth.onAuthStateChange((_event, s) => {
-      setSession(s);
-      if (s?.user) {
-        setTimeout(() => void loadUserData(s.user.id), 0);
-      } else {
-        setProfile(null);
-        setIsAdmin(false);
-      }
-    });
-
-    void supabase.auth.getSession().then(async ({ data }) => {
-      setSession(data.session);
-      if (data.session?.user) await loadUserData(data.session.user.id);
-      setLoading(false);
-    });
-
-    return () => sub.subscription.unsubscribe();
+    void loadCurrentUser().finally(() => setLoading(false));
   }, []);
 
   const value = useMemo<AuthContextValue>(
     () => ({
       user,
-      session,
-      profile,
-      isAdmin,
+      session: getToken() ? { access_token: getToken() ?? "" } : null,
+      profile: user,
+      isAdmin: user?.role === "admin",
       loading,
       refreshProfile: async () => {
-        if (user) await loadUserData(user.id);
+        await loadCurrentUser();
       },
+      setAuthenticatedUser: setUser,
       signOut: async () => {
-        await supabase.auth.signOut();
-        setSession(null);
-        setProfile(null);
-        setIsAdmin(false);
+        clearToken();
+        setUser(null);
       },
     }),
-    [user, session, profile, isAdmin, loading],
+    [user, loading],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

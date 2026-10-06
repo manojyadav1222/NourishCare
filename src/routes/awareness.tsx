@@ -14,6 +14,7 @@ import {
   Moon,
   Refrigerator,
   Salad,
+  ShoppingBasket,
   Soup,
   Users,
 } from "lucide-react";
@@ -31,7 +32,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { AWARENESS_TOPICS, HEALTH_DISCLAIMER } from "@/lib/nutrition";
-import { supabase } from "@/integrations/supabase/client";
+import { contentApi, marketApi, type MarketProduct, type NutritionArticle } from "@/lib/api";
 
 export const Route = createFileRoute("/awareness")({
   head: () => ({
@@ -69,24 +70,14 @@ const ICONS: Record<string, typeof Salad> = {
   apple: Apple,
 };
 
-type Article = {
-  id: string;
-  title: string;
-  category: string;
-  description: string;
-  content: string;
-};
+type Article = NutritionArticle;
 
 export function useArticles() {
   return useQuery({
     queryKey: ["articles"],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("nutrition_articles")
-        .select("id,title,category,description,content")
-        .order("created_at", { ascending: true });
-      if (error) throw error;
-      return (data ?? []) as Article[];
+      const { records } = await contentApi.articles();
+      return records;
     },
   });
 }
@@ -204,6 +195,7 @@ function Awareness() {
               <p className="whitespace-pre-line text-sm leading-relaxed text-muted-foreground">
                 {open.content}
               </p>
+              <RelatedMarketProducts topic={open.title} />
               <Disclaimer className="mt-2">{HEALTH_DISCLAIMER}</Disclaimer>
             </>
           ) : null}
@@ -212,5 +204,53 @@ function Awareness() {
 
       <SiteFooter />
     </div>
+  );
+}
+
+function RelatedMarketProducts({ topic }: { topic: string }) {
+  const { data = [] } = useQuery({
+    queryKey: ["related-market-products", topic],
+    queryFn: async () => {
+      const { records } = await marketApi.products({ topic });
+      return records.slice(0, 3);
+    },
+  });
+
+  if (data.length === 0) return null;
+
+  return (
+    <div className="mt-6 rounded-2xl border border-border bg-secondary/40 p-4">
+      <div className="flex items-center justify-between gap-4">
+        <div>
+          <h3 className="text-sm font-semibold">Related foods in Nourish Market</h3>
+          <p className="mt-1 text-xs text-muted-foreground">
+            Product suggestions connected to this awareness topic.
+          </p>
+        </div>
+        <Button asChild variant="soft" size="sm">
+          <Link to="/market">Shop</Link>
+        </Button>
+      </div>
+      <div className="mt-4 grid gap-3">
+        {data.map((product) => (
+          <RelatedProduct key={product.id} product={product} />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function RelatedProduct({ product }: { product: MarketProduct }) {
+  return (
+    <Link
+      to="/market"
+      className="flex items-center justify-between gap-4 rounded-xl bg-background px-4 py-3 text-sm transition-colors hover:bg-accent"
+    >
+      <span className="flex min-w-0 items-center gap-3">
+        <ShoppingBasket className="h-4 w-4 shrink-0 text-primary" />
+        <span className="truncate font-medium">{product.name}</span>
+      </span>
+      <span className="shrink-0 text-xs text-muted-foreground">Rs {product.price.toFixed(0)}</span>
+    </Link>
   );
 }
