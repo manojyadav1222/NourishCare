@@ -1,23 +1,13 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { ExternalLink, Loader2, Minus, Plus, Search, ShoppingBasket, Trash2 } from "lucide-react";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { useQuery } from "@tanstack/react-query";
+import { ExternalLink, Search, ShoppingBasket } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
-import { toast } from "sonner";
 import { z } from "zod";
 import { SiteFooter } from "@/components/site/SiteFooter";
 import { SiteNav } from "@/components/site/SiteNav";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { useAuth } from "@/hooks/useAuth";
 import { marketApi, type MarketProduct } from "@/lib/api";
 
 const searchSchema = z.object({
@@ -46,12 +36,6 @@ export const Route = createFileRoute("/market")({
   component: MarketPage,
 });
 
-type CartItem = {
-  product: MarketProduct;
-  quantity: number;
-};
-
-const CART_KEY = "nourishcare_market_cart";
 const PLATFORM_META: Record<
   string,
   { delivery: string; trust: string; accent: string; initials: string }
@@ -98,41 +82,11 @@ function productRating(product: MarketProduct) {
   return (4.2 + (seed % 7) / 10).toFixed(1);
 }
 
-function readCart(products: MarketProduct[]): CartItem[] {
-  if (typeof window === "undefined") return [];
-  try {
-    const raw = JSON.parse(window.localStorage.getItem(CART_KEY) || "[]") as {
-      product_id: number;
-      quantity: number;
-    }[];
-    return raw
-      .map((item) => {
-        const product = products.find((p) => p.id === item.product_id);
-        return product ? { product, quantity: Math.max(1, item.quantity) } : null;
-      })
-      .filter(Boolean) as CartItem[];
-  } catch {
-    return [];
-  }
-}
-
-function saveCart(items: CartItem[]) {
-  window.localStorage.setItem(
-    CART_KEY,
-    JSON.stringify(items.map((item) => ({ product_id: item.product.id, quantity: item.quantity }))),
-  );
-}
-
 function MarketPage() {
-  const { user } = useAuth();
   const navigate = useNavigate();
   const marketSearch = Route.useSearch();
-  const qc = useQueryClient();
   const [category, setCategory] = useState(marketSearch.category || "All");
   const [search, setSearch] = useState(marketSearch.q || marketSearch.topic || "");
-  const [cart, setCart] = useState<CartItem[]>([]);
-  const [saveOpen, setSaveOpen] = useState(false);
-  const [busy, setBusy] = useState(false);
 
   const {
     data: products = [],
@@ -153,14 +107,6 @@ function MarketPage() {
     setSearch(marketSearch.q || marketSearch.topic || "");
   }, [marketSearch.category, marketSearch.q, marketSearch.topic]);
 
-  useEffect(() => {
-    if (products.length) setCart(readCart(products));
-  }, [products]);
-
-  useEffect(() => {
-    saveCart(cart);
-  }, [cart]);
-
   const categories = useMemo(
     () => ["All", ...Array.from(new Set(products.map((product) => product.category)))],
     [products],
@@ -176,62 +122,6 @@ function MarketPage() {
       product.nutrition_tags.some((tag) => tag.toLowerCase().includes(needle));
     return matchesCategory && matchesSearch;
   });
-
-  const subtotal = cart.reduce((sum, item) => sum + item.product.price * item.quantity, 0);
-  const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
-
-  function addToCart(product: MarketProduct) {
-    setCart((items) => {
-      const existing = items.find((item) => item.product.id === product.id);
-      if (existing) {
-        return items.map((item) =>
-          item.product.id === product.id ? { ...item, quantity: item.quantity + 1 } : item,
-        );
-      }
-      return [...items, { product, quantity: 1 }];
-    });
-    toast.success(`${product.name} added to cart.`);
-  }
-
-  function setQuantity(productId: number, quantity: number) {
-    setCart((items) =>
-      items
-        .map((item) =>
-          item.product.id === productId ? { ...item, quantity: Math.max(1, quantity) } : item,
-        )
-        .filter((item) => item.quantity > 0),
-    );
-  }
-
-  function removeFromCart(productId: number) {
-    setCart((items) => items.filter((item) => item.product.id !== productId));
-  }
-
-  async function handleCheckout(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    if (!user) {
-      toast.error("Please login to save your shopping list.");
-      void navigate({ to: "/auth", search: { mode: "login" } });
-      return;
-    }
-    if (!cart.length) return;
-    const form = new FormData(e.currentTarget);
-    setBusy(true);
-    try {
-      await marketApi.saveList({
-        customer_name: String(form.get("customer_name") ?? "").trim(),
-        items: cart.map((item) => ({ product_id: item.product.id, quantity: item.quantity })),
-      });
-      setSaveOpen(false);
-      void qc.invalidateQueries({ queryKey: ["market-orders", user.id] });
-      toast.success("Shopping list saved.");
-      void navigate({ to: "/orders" });
-    } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Could not save the shopping list.");
-    } finally {
-      setBusy(false);
-    }
-  }
 
   return (
     <div className="min-h-screen bg-background">
@@ -252,17 +142,6 @@ function MarketPage() {
                 <Button asChild variant="hero">
                   <a href="#products">Shop nutrient foods</a>
                 </Button>
-                {user ? (
-                  <Button asChild variant="soft">
-                    <Link to="/orders">Saved lists</Link>
-                  </Button>
-                ) : (
-                  <Button asChild variant="soft">
-                    <Link to="/auth" search={{ mode: "login" }}>
-                      Login to save lists
-                    </Link>
-                  </Button>
-                )}
               </div>
             </div>
             <Card className="rounded-3xl border-border shadow-lift">
@@ -272,9 +151,9 @@ function MarketPage() {
                     <ShoppingBasket className="h-6 w-6" />
                   </span>
                   <div>
-                    <p className="font-semibold">Shopping list preview</p>
+                    <p className="font-semibold">Partner marketplace</p>
                     <p className="text-sm text-muted-foreground">
-                      {totalItems} items · Rs {subtotal.toFixed(0)}
+                      Amazon · Blinkit · BigBasket · JioMart
                     </p>
                   </div>
                 </div>
@@ -289,15 +168,14 @@ function MarketPage() {
 
         <section
           id="products"
-          className="mx-auto grid max-w-6xl gap-8 px-4 py-14 lg:grid-cols-[1fr_340px]"
+          className="mx-auto max-w-6xl px-4 py-14"
         >
           <div>
             <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
               <div>
                 <h2 className="text-2xl font-semibold">Nutrient food catalog</h2>
                 <p className="mt-1 text-sm text-muted-foreground">
-                  Browse foods by nutrition benefit, compare partner links and build a healthy
-                  shopping list.
+                  Browse foods by nutrition benefit and continue to the matching partner platform.
                 </p>
               </div>
               <div className="relative md:w-72">
@@ -348,150 +226,19 @@ function MarketPage() {
             ) : (
               <div className="mt-7 grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
                 {filtered.map((product) => (
-                  <ProductCard key={product.id} product={product} onAdd={addToCart} />
+                  <ProductCard key={product.id} product={product} />
                 ))}
               </div>
             )}
           </div>
-
-          <aside className="lg:sticky lg:top-24 lg:self-start">
-            <Card className="rounded-3xl border-border shadow-soft">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <h2 className="text-lg font-semibold">Shopping list</h2>
-                  <span className="text-sm text-muted-foreground">{totalItems} items</span>
-                </div>
-                {cart.length === 0 ? (
-                  <div className="py-12 text-center">
-                    <ShoppingBasket className="mx-auto h-8 w-8 text-muted-foreground" />
-                    <p className="mt-3 text-sm text-muted-foreground">
-                      Add nutrient foods to build a healthy shopping list.
-                    </p>
-                  </div>
-                ) : (
-                  <div className="mt-5 space-y-4">
-                    {cart.map((item) => (
-                      <div key={item.product.id} className="rounded-2xl border border-border p-4">
-                        <div className="flex items-start justify-between gap-3">
-                          <div>
-                            <p className="text-sm font-semibold">{item.product.name}</p>
-                            <p className="mt-1 text-xs text-muted-foreground">
-                              Rs {item.product.price.toFixed(0)} · {item.product.platform}
-                            </p>
-                          </div>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => removeFromCart(item.product.id)}
-                            aria-label={`Remove ${item.product.name}`}
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </div>
-                        <div className="mt-3 flex items-center justify-between">
-                          <div className="flex items-center gap-2">
-                            <Button
-                              variant="outline"
-                              size="icon"
-                              onClick={() => setQuantity(item.product.id, item.quantity - 1)}
-                              disabled={item.quantity === 1}
-                            >
-                              <Minus className="h-3.5 w-3.5" />
-                            </Button>
-                            <span className="w-7 text-center text-sm font-semibold">
-                              {item.quantity}
-                            </span>
-                            <Button
-                              variant="outline"
-                              size="icon"
-                              onClick={() => setQuantity(item.product.id, item.quantity + 1)}
-                            >
-                              <Plus className="h-3.5 w-3.5" />
-                            </Button>
-                          </div>
-                          <p className="text-sm font-semibold">
-                            Rs {(item.product.price * item.quantity).toFixed(0)}
-                          </p>
-                        </div>
-                      </div>
-                    ))}
-                    <div className="flex items-center justify-between border-t border-border pt-4">
-                      <span className="text-sm font-medium">Subtotal</span>
-                      <span className="font-display text-2xl font-semibold">
-                        Rs {subtotal.toFixed(0)}
-                      </span>
-                    </div>
-                    <Button
-                      variant="hero"
-                      className="w-full"
-                      onClick={() => {
-                        if (!user) {
-                          toast.error("Login to save your shopping list.");
-                          void navigate({ to: "/auth", search: { mode: "login" } });
-                          return;
-                        }
-                        setSaveOpen(true);
-                      }}
-                    >
-                      Save shopping list
-                    </Button>
-                    <p className="text-xs leading-relaxed text-muted-foreground">
-                      Use product buy buttons to complete purchases on partner platforms.
-                    </p>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </aside>
         </section>
       </main>
       <SiteFooter />
-
-      <Dialog open={saveOpen} onOpenChange={setSaveOpen}>
-        <DialogContent className="rounded-3xl sm:max-w-lg">
-          <DialogHeader>
-            <DialogTitle>Save shopping list</DialogTitle>
-            <DialogDescription>
-              Save this list to your NourishCare account. Purchases happen on partner platforms.
-            </DialogDescription>
-          </DialogHeader>
-          <form className="space-y-4" onSubmit={handleCheckout}>
-            <div className="space-y-2">
-              <Label htmlFor="customer_name">List name</Label>
-              <Input
-                id="customer_name"
-                name="customer_name"
-                defaultValue="My healthy shopping list"
-                required
-              />
-            </div>
-            <div className="rounded-2xl bg-secondary/60 p-4 text-sm">
-              <div className="flex justify-between">
-                <span>Estimated total</span>
-                <span className="font-semibold">Rs {subtotal.toFixed(0)}</span>
-              </div>
-              <p className="mt-2 text-xs text-muted-foreground">
-                Final prices may change on Amazon, Blinkit, BigBasket or JioMart.
-              </p>
-            </div>
-            <Button type="submit" variant="hero" className="w-full" disabled={busy}>
-              {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
-              Save list
-            </Button>
-          </form>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }
 
-function ProductCard({
-  product,
-  onAdd,
-}: {
-  product: MarketProduct;
-  onAdd: (product: MarketProduct) => void;
-}) {
+function ProductCard({ product }: { product: MarketProduct }) {
   const available = product.stock_status.toLowerCase() === "in stock";
   const platform = getPlatformMeta(product.platform);
   const rating = productRating(product);
@@ -561,10 +308,6 @@ function ProductCard({
               <p className="font-display text-2xl font-semibold">Rs {product.price.toFixed(0)}</p>
               <p className="text-xs text-muted-foreground">estimated · {product.unit}</p>
             </div>
-            <Button variant="soft" onClick={() => onAdd(product)} disabled={!available}>
-              <Plus className="h-4 w-4" />
-              Add
-            </Button>
           </div>
           <Button asChild variant="hero" className="mt-3 w-full" disabled={!product.product_url}>
             <a href={product.product_url ?? "#"} target="_blank" rel="noreferrer">

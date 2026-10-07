@@ -9,7 +9,6 @@ import {
   ListChecks,
   LogOut,
   Menu,
-  ReceiptText,
   Shield,
   ShoppingBasket,
   User,
@@ -28,7 +27,6 @@ const NAV = [
   { to: "/water", label: "Water", icon: Droplet },
   { to: "/progress", label: "Progress", icon: LineChart },
   { to: "/market", label: "Market", icon: ShoppingBasket },
-  { to: "/orders", label: "Saved Lists", icon: ReceiptText },
   { to: "/profile", label: "Profile", icon: User },
 ] as const;
 
