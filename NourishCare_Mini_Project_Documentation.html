@@ -1,0 +1,763 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>NourishCare_Mini_Project_Documentation</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+    /* CSS for syntax highlighting */
+    html { -webkit-text-size-adjust: 100%; }
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { color: #008000; } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { color: #008000; font-weight: bold; } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+  </style>
+</head>
+<body>
+<h1
+id="nourishcare-community-nutrition-counseling-health-awareness-portal">NourishCare
+– Community Nutrition Counseling &amp; Health Awareness Portal</h1>
+<h2 id="abstract">1. Abstract</h2>
+<p>NourishCare is a full-stack web application developed as a Community
+Service Project (CSP) for nutrition counseling, health awareness, and
+healthy lifestyle development. The project helps users understand basic
+nutritional health, calculate Body Mass Index (BMI), complete a health
+and nutrition assessment, generate affordable Indian meal plans, track
+daily habits, monitor water intake, view personal progress, and access
+educational awareness resources.</p>
+<p>The application is designed for community residents and families who
+may not have regular access to structured nutrition counseling. It
+focuses on practical, educational, and budget-friendly health guidance
+rather than medical diagnosis. The system also includes a Nourish Market
+feature that acts as a mediator between users and partner shopping
+platforms such as Amazon, Blinkit, BigBasket, and JioMart by showing
+nutrition-related food products and external buying links.</p>
+<p>NourishCare uses a React and TypeScript frontend with a Flask backend
+and SQLite database. It includes user authentication, protected
+dashboards, role-based admin access, data persistence, charts, form
+validation, educational disclaimers, and a local-language voice guide
+for simple nutrition assistance.</p>
+<h2 id="introduction">2. Introduction</h2>
+<p>Nutrition plays an important role in daily life, energy, immunity,
+growth, concentration, and long-term health. Many people know that
+healthy eating is important, but they may not know how to select
+affordable nutritious foods or how to build consistent healthy habits.
+This problem is especially common in communities where access to
+dietitians, structured nutrition education, and regular health
+counseling is limited.</p>
+<p>NourishCare was developed to support such users through a simple
+digital platform. It combines nutrition education, health tools,
+personal tracking, meal planning, market suggestions, and awareness
+content in one place. Users can register, log in, save their health
+records, and track progress over time.</p>
+<p>The application is not a hospital system or a medical diagnosis
+platform. It is an educational and demonstration-based web application
+for a college CSP project. It gives general nutrition awareness and
+encourages users to consult qualified health professionals for medical
+conditions.</p>
+<h2 id="objectives">3. Objectives</h2>
+<p>The main objectives of NourishCare are:</p>
+<ol type="1">
+<li>To create a user-friendly community nutrition and health awareness
+portal.</li>
+<li>To help users calculate BMI and understand BMI categories.</li>
+<li>To provide a health and nutrition assessment based on food habits,
+hydration, activity, sleep, and basic health notes.</li>
+<li>To generate simple rule-based Indian meal plans for vegetarian,
+non-vegetarian, and vegan users.</li>
+<li>To help users track daily healthy habits such as drinking water,
+eating vegetables, eating fruit, including protein, exercising, reducing
+processed food, and maintaining sleep.</li>
+<li>To provide a water tracker with daily goal and progress.</li>
+<li>To show saved BMI, weight, habit, water, meal plan, and assessment
+history.</li>
+<li>To provide nutrition learning content on carbohydrates, protein,
+fats, iron, calcium, vitamins, balanced diet, hydration, food hygiene,
+portion control, and food labels.</li>
+<li>To provide health awareness content for healthy eating, iron-rich
+foods, protein-rich foods, women, children, older adults, sugar
+reduction, salt reduction, physical activity, stress, sleep, and food
+hygiene.</li>
+<li>To create a Nourish Market where users can discover nutrient-rich
+products and open partner shopping links.</li>
+<li>To include a local-language voice guide for basic nutrition help in
+English, Hindi/Hinglish, and Telugu/Tanglish.</li>
+<li>To provide a simple admin dashboard for aggregate statistics and
+content/product management.</li>
+</ol>
+<h2 id="problem-statement">4. Problem Statement</h2>
+<p>Many community residents do not have easy access to reliable
+nutrition counseling and health awareness resources. They may face
+difficulty in understanding BMI, identifying basic nutrition gaps,
+planning affordable meals, building healthy habits, drinking enough
+water, and selecting nutrient-rich foods.</p>
+<p>Existing health information is often too general, too medical, or not
+connected to daily food choices. People may also forget to track
+progress because tools are spread across different platforms.</p>
+<p>Therefore, there is a need for a simple full-stack web application
+that combines nutrition education, BMI calculation, health assessment,
+meal planning, habit tracking, water tracking, progress monitoring, and
+marketplace guidance in one system.</p>
+<p>NourishCare solves this by providing an educational, easy-to-use, and
+community-focused health awareness portal.</p>
+<h2 id="software-requirements">5. Software Requirements</h2>
+<h3 id="frontend-technologies">Frontend Technologies</h3>
+<ul>
+<li>React 19</li>
+<li>TypeScript</li>
+<li>TanStack Router</li>
+<li>TanStack React Query</li>
+<li>Tailwind CSS</li>
+<li>Radix UI components</li>
+<li>Lucide React icons</li>
+<li>Recharts for charts and progress visualization</li>
+<li>Zod for form validation</li>
+<li>Sonner for toast notifications</li>
+<li>Vite for development and build</li>
+</ul>
+<h3 id="backend-technologies">Backend Technologies</h3>
+<ul>
+<li>Python</li>
+<li>Flask</li>
+<li>Flask-CORS</li>
+<li>SQLAlchemy</li>
+<li>PyJWT for JSON Web Token authentication</li>
+<li>Werkzeug password hashing</li>
+<li>SQLite database for local development</li>
+</ul>
+<h3 id="development-tools">Development Tools</h3>
+<ul>
+<li>VS Code</li>
+<li>Node.js and npm</li>
+<li>Python 3</li>
+<li>Browser such as Chrome</li>
+<li>Terminal</li>
+</ul>
+<h3 id="environment-variables">Environment Variables</h3>
+<p>Frontend:</p>
+<pre class="env"><code>VITE_API_BASE_URL=http://localhost:5000/api</code></pre>
+<p>Backend:</p>
+<pre class="env"><code>JWT_SECRET_KEY=
+DATABASE_URL=sqlite:///nourishcare.db
+CORS_ORIGINS=http://localhost:5173,http://localhost:8080
+ADMIN_FULL_NAME=
+ADMIN_EMAIL=
+ADMIN_PASSWORD=</code></pre>
+<h3 id="main-commands">Main Commands</h3>
+<p>Install frontend dependencies:</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="ex">npm</span> install</span></code></pre></div>
+<p>Run frontend:</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="ex">npm</span> run dev</span></code></pre></div>
+<p>Run backend:</p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> backend</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="ex">python3</span> app.py</span></code></pre></div>
+<p>Build frontend:</p>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="ex">npm</span> run build</span></code></pre></div>
+<p>TypeScript check:</p>
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="ex">npx</span> tsc <span class="at">--noEmit</span></span></code></pre></div>
+<p>Lint check:</p>
+<div class="sourceCode" id="cb8"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="ex">npm</span> run lint</span></code></pre></div>
+<h2 id="hardware-requirements">6. Hardware Requirements</h2>
+<p>Minimum hardware requirements:</p>
+<ul>
+<li>Processor: Intel i3 or equivalent</li>
+<li>RAM: 4 GB minimum</li>
+<li>Storage: 1 GB free space</li>
+<li>Internet connection for installing dependencies and opening external
+marketplace links</li>
+<li>Microphone for voice assistant input</li>
+<li>Display: 1366 x 768 or higher recommended</li>
+</ul>
+<p>Recommended hardware requirements:</p>
+<ul>
+<li>Processor: Intel i5 or Apple Silicon equivalent</li>
+<li>RAM: 8 GB or above</li>
+<li>Storage: 2 GB free space</li>
+<li>Chrome browser for best speech recognition support</li>
+</ul>
+<h2 id="services-page">7. Services Page</h2>
+<p>The NourishCare landing page contains a services section that
+explains the major services offered by the portal. The services are:</p>
+<h3 id="nutrition-counseling">1. Nutrition Counseling</h3>
+<p>Provides structured and easy-to-understand nutrition guidance based
+on daily foods and affordable Indian meal options.</p>
+<h3 id="health-assessment">2. Health Assessment</h3>
+<p>Allows users to complete a questionnaire about age, height, weight,
+eating habits, hydration, exercise, sleep, and health notes. The system
+calculates a simple wellness summary and suggestions.</p>
+<h3 id="meal-guidance">3. Meal Guidance</h3>
+<p>Generates rule-based meal plans for vegetarian, non-vegetarian, and
+vegan users. Plans include breakfast, morning snack, lunch, evening
+snack, and dinner.</p>
+<h3 id="nutrition-education">4. Nutrition Education</h3>
+<p>Provides learning content on nutrients and food practices such as
+carbohydrates, protein, healthy fats, iron, calcium, vitamins, balanced
+diet, hydration, hygiene, portion control, and food labels.</p>
+<h3 id="habit-building">5. Habit Building</h3>
+<p>Allows users to track seven core healthy habits every day and view
+completion progress.</p>
+<h3 id="progress-monitoring">6. Progress Monitoring</h3>
+<p>Displays saved BMI history, weight trends, water intake, habit
+progress, meal plans, and assessment history using clean UI and
+charts.</p>
+<h3 id="nourish-market">7. Nourish Market</h3>
+<p>Shows nutrient-rich food products such as ragi flour, roasted chana,
+soy chunks, moong dal, dates, sesame seeds, makhana, chikki, curd
+starter kit, and mixed nuts. Users can create a healthy shopping list
+and open external partner platform links to buy products.</p>
+<h3 id="voice-guide">8. Voice Guide</h3>
+<p>Provides a floating local-language assistant that can answer basic
+nutrition questions and suggest related app actions such as opening meal
+planner, BMI calculator, water tracker, or Nourish Market.</p>
+<h2 id="development-and-implementation">8. Development and
+Implementation</h2>
+<h3 id="project-architecture">Project Architecture</h3>
+<p>NourishCare follows a client-server architecture.</p>
+<p>The frontend is built with React, TypeScript, TanStack Router,
+Tailwind CSS, and reusable UI components. It communicates with the
+backend using REST API calls from <code>src/lib/api.ts</code>.</p>
+<p>The backend is built with Flask and SQLAlchemy. It exposes REST
+endpoints for authentication, profile, BMI, assessment, meal plans,
+habits, water, articles, market products, admin functions, and assistant
+chat. The database is SQLite for local development.</p>
+<h3 id="folder-structure">Folder Structure</h3>
+<p>Important project folders and files:</p>
+<ul>
+<li><code>src/routes</code> – frontend pages and routes</li>
+<li><code>src/components</code> – reusable UI, site, app, and health
+components</li>
+<li><code>src/lib/api.ts</code> – frontend API client</li>
+<li><code>src/lib/nutrition.ts</code> – BMI logic, assessment logic,
+meal planner data, nutrition content</li>
+<li><code>src/hooks/useAuth.tsx</code> – authentication state
+management</li>
+<li><code>backend/app.py</code> – Flask app creation, CORS, database
+creation, seed data</li>
+<li><code>backend/models.py</code> – database models</li>
+<li><code>backend/routes</code> – Flask route modules</li>
+<li><code>backend/auth_utils.py</code> – password hashing, JWT creation,
+login protection, admin protection</li>
+<li><code>backend/config.py</code> – database, JWT, CORS, and
+environment configuration</li>
+</ul>
+<h3 id="authentication-implementation">Authentication
+Implementation</h3>
+<p>Authentication is implemented using email, password, hashed
+passwords, and JWT tokens.</p>
+<p>User registration validates name, email, password, age, gender, and
+phone. Passwords are stored as hashes using Werkzeug. Login checks the
+email and password and returns a JWT token. The token is stored in
+browser local storage as <code>nourishcare_token</code>.</p>
+<p>Protected routes use <code>login_required</code> on the backend and
+authenticated route guards on the frontend. Admin routes use
+<code>admin_required</code>, which checks whether the logged-in user has
+the <code>admin</code> role.</p>
+<p>Forgot password and reset password are supported for demo use. In
+non-production mode, the backend can generate a reset token.</p>
+<h3 id="database-tables">Database Tables</h3>
+<p>The current backend database models are:</p>
+<ol type="1">
+<li><code>users</code>
+<ul>
+<li>Stores user profile, email, password hash, height, weight, diet
+preference, health goal, water goal, and role.</li>
+</ul></li>
+<li><code>bmi_records</code>
+<ul>
+<li>Stores user BMI records, height, weight, BMI value, category, and
+created date.</li>
+</ul></li>
+<li><code>health_assessments</code>
+<ul>
+<li>Stores questionnaire answers and wellness summary.</li>
+</ul></li>
+<li><code>meal_plans</code>
+<ul>
+<li>Stores generated meal plans, diet preference, health goal, budget,
+and meal plan JSON.</li>
+</ul></li>
+<li><code>habit_logs</code>
+<ul>
+<li>Stores daily habit completion for each user.</li>
+</ul></li>
+<li><code>water_logs</code>
+<ul>
+<li>Stores daily water intake and water goal.</li>
+</ul></li>
+<li><code>nutrition_articles</code>
+<ul>
+<li>Stores educational articles for awareness pages.</li>
+</ul></li>
+<li><code>nutrition_tips</code>
+<ul>
+<li>Stores tips shown in dashboard and admin.</li>
+</ul></li>
+<li><code>market_products</code>
+<ul>
+<li>Stores Nourish Market products, categories, prices, product links,
+nutrition tags, related topics, image URLs, and stock status.</li>
+</ul></li>
+<li><code>market_orders</code></li>
+</ol>
+<ul>
+<li>Stores saved shopping lists.</li>
+</ul>
+<ol start="11" type="1">
+<li><code>market_order_items</code></li>
+</ol>
+<ul>
+<li>Stores items inside saved shopping lists.</li>
+</ul>
+<h3 id="main-frontend-pages">Main Frontend Pages</h3>
+<ol type="1">
+<li><code>/</code>
+<ul>
+<li>Landing page with hero section, services, nutrition importance, BMI
+introduction, meal guidance, awareness, habit tracking, and community
+mission.</li>
+</ul></li>
+<li><code>/about</code>
+<ul>
+<li>Explains the project mission, target users, limitations, objectives,
+and privacy commitment.</li>
+</ul></li>
+<li><code>/nutrition</code>
+<ul>
+<li>Nutrition Learning Center with topics such as carbohydrates,
+protein, fats, iron, calcium, vitamins, balanced diet, hydration,
+hygiene, portion control, and food labels.</li>
+</ul></li>
+<li><code>/awareness</code>
+<ul>
+<li>Awareness resources and articles related to community health
+topics.</li>
+</ul></li>
+<li><code>/health-tools</code>
+<ul>
+<li>Public BMI calculator and links to authenticated health tools.</li>
+</ul></li>
+<li><code>/auth</code>
+<ul>
+<li>Login and registration page.</li>
+</ul></li>
+<li><code>/reset-password</code>
+<ul>
+<li>Password reset page.</li>
+</ul></li>
+<li><code>/dashboard</code>
+<ul>
+<li>Protected user dashboard showing BMI, wellness score, habits, water
+progress, latest meal plan, tip of the day, and quick actions.</li>
+</ul></li>
+<li><code>/assessment</code>
+<ul>
+<li>Health and nutrition assessment form with wellness result.</li>
+</ul></li>
+<li><code>/meal-planner</code></li>
+</ol>
+<ul>
+<li>Rule-based personalized Indian meal planner.</li>
+</ul>
+<ol start="11" type="1">
+<li><code>/habits</code></li>
+</ol>
+<ul>
+<li>Daily habit tracker.</li>
+</ul>
+<ol start="12" type="1">
+<li><code>/water</code></li>
+</ol>
+<ul>
+<li>Water intake tracker.</li>
+</ul>
+<ol start="13" type="1">
+<li><code>/progress</code></li>
+</ol>
+<ul>
+<li>User progress charts and history.</li>
+</ul>
+<ol start="14" type="1">
+<li><code>/profile</code></li>
+</ol>
+<ul>
+<li>User profile update page.</li>
+</ul>
+<ol start="15" type="1">
+<li><code>/market</code></li>
+</ol>
+<ul>
+<li>Nourish Market product discovery page.</li>
+</ul>
+<ol start="16" type="1">
+<li><code>/orders</code></li>
+</ol>
+<ul>
+<li>Saved shopping lists page.</li>
+</ul>
+<ol start="17" type="1">
+<li><code>/admin</code></li>
+</ol>
+<ul>
+<li>Admin dashboard for aggregate statistics, articles, tips, and
+products.</li>
+</ul>
+<h3 id="backend-api-modules">Backend API Modules</h3>
+<ol type="1">
+<li><code>/api/auth</code>
+<ul>
+<li>Register, login, current user, forgot password, reset password.</li>
+</ul></li>
+<li><code>/api/profile</code>
+<ul>
+<li>Get and update profile.</li>
+</ul></li>
+<li><code>/api/bmi</code>
+<ul>
+<li>Save and list BMI records.</li>
+</ul></li>
+<li><code>/api/assessments</code>
+<ul>
+<li>Save and list health assessments.</li>
+</ul></li>
+<li><code>/api/meal-plans</code>
+<ul>
+<li>Save and list meal plans.</li>
+</ul></li>
+<li><code>/api/habits</code>
+<ul>
+<li>Save and list habit logs.</li>
+</ul></li>
+<li><code>/api/water</code>
+<ul>
+<li>Save and list water logs.</li>
+</ul></li>
+<li><code>/api/articles</code> and <code>/api/tips</code>
+<ul>
+<li>Public nutrition article and tip content.</li>
+</ul></li>
+<li><code>/api/market</code>
+<ul>
+<li>Product list, filtered products, saved shopping lists.</li>
+</ul></li>
+<li><code>/api/admin</code></li>
+</ol>
+<ul>
+<li>Admin statistics and content/product management.</li>
+</ul>
+<ol start="11" type="1">
+<li><code>/api/assistant</code></li>
+</ol>
+<ul>
+<li>Rule-based local-language assistant response endpoint.</li>
+</ul>
+<h3 id="feature-implementation">Feature Implementation</h3>
+<h4 id="bmi-calculator">BMI Calculator</h4>
+<p>The BMI calculator accepts height in centimeters and weight in
+kilograms. It calculates BMI using:</p>
+<pre class="text"><code>BMI = weight / (height in meters × height in meters)</code></pre>
+<p>It then classifies the result as Underweight, Normal, Overweight, or
+Obese. Logged-in users can save BMI records to the database.</p>
+<h4 id="health-assessment-1">Health Assessment</h4>
+<p>The assessment collects user data about meals, fruits, vegetables,
+protein, processed food, sugary food, water, exercise, sleep, and health
+conditions. A wellness score is generated using rule-based logic in
+<code>src/lib/nutrition.ts</code>.</p>
+<h4 id="meal-planner">Meal Planner</h4>
+<p>The meal planner generates affordable Indian meal plans based on diet
+preference, health goal, and budget. It is rule-based and does not use
+external AI APIs. Generated meal plans can be saved to the database.</p>
+<h4 id="habit-tracker">Habit Tracker</h4>
+<p>The habit tracker allows users to mark daily habits as complete or
+incomplete. The system stores daily habit logs and calculates completion
+progress.</p>
+<h4 id="water-tracker">Water Tracker</h4>
+<p>The water tracker stores the number of glasses consumed per day and
+compares it with the user’s daily water goal.</p>
+<h4 id="progress-page">Progress Page</h4>
+<p>The progress page displays saved health records such as BMI history,
+weight history, habit history, water history, and assessment history
+with visual charts.</p>
+<h4 id="nourish-market-1">Nourish Market</h4>
+<p>Nourish Market displays nutrient-rich foods with product category,
+price, health benefit, nutrition tags, platform name, image or generated
+visual, and partner shopping link. Users can add products to a shopping
+list and save the list after login.</p>
+<h4 id="admin-dashboard">Admin Dashboard</h4>
+<p>Admin users can view aggregate statistics such as total users,
+assessments, meal plans, habit logs, water logs, average BMI, average
+water intake, market products, saved market lists, and market demo
+revenue. Admin users can also manage articles, tips, and market
+products.</p>
+<h4 id="voice-guide-1">Voice Guide</h4>
+<p>The voice guide supports typed and spoken questions. It gives
+rule-based responses for topics such as iron, protein, calcium, water,
+BMI, meal planning, habits, and market. It supports English,
+Hindi/Hinglish, and Telugu/Tanglish responses using browser speech
+recognition and speech synthesis.</p>
+<h3 id="security-and-privacy">Security and Privacy</h3>
+<p>Security features include:</p>
+<ul>
+<li>Password hashing</li>
+<li>JWT-based authentication</li>
+<li>Protected backend routes</li>
+<li>Admin-only backend routes</li>
+<li>Form validation</li>
+<li>User-specific data access</li>
+<li>Educational health disclaimers</li>
+<li>Aggregate admin statistics instead of individual private health
+information</li>
+</ul>
+<h3 id="limitations">Limitations</h3>
+<p>NourishCare is a college demonstration project, not a production
+healthcare platform. It does not diagnose disease, prescribe medicines,
+replace doctors, process real payments, or provide real delivery
+services. The marketplace opens external partner links and does not
+handle actual transactions.</p>
+<h2 id="conclusion">9. Conclusion</h2>
+<p>NourishCare successfully demonstrates a complete full-stack community
+nutrition counseling and health awareness portal. It combines
+educational content, personal health tools, user authentication,
+database persistence, progress tracking, meal planning, habit tracking,
+water tracking, admin management, Nourish Market, and a local-language
+voice guide.</p>
+<p>The project is useful for a college CSP demonstration because it
+addresses a real community need: improving nutrition awareness and
+encouraging practical healthy habits. It is simple enough for users to
+understand, but complete enough to show full-stack development skills,
+database design, authentication, frontend design, backend API
+development, and user-centered problem solving.</p>
+<p>Future improvements can include local vendor onboarding, smarter
+product recommendations, appointment booking with nutrition counselors,
+printable diet charts, regional-language content pages, and offline
+community survey support.</p>
+</body>
+</html>

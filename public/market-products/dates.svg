@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" role="img" aria-label="Dates">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#f8faf3"/>
+      <stop offset="1" stop-color="#c68045"/>
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="18" stdDeviation="18" flood-color="#1b2a1f" flood-opacity="0.22"/>
+    </filter>
+  </defs>
+  <rect width="800" height="600" fill="url(#bg)"/>
+  <circle cx="676" cy="95" r="110" fill="#5b2a20" opacity="0.10"/>
+  <circle cx="118" cy="480" r="140" fill="#2f7b4f" opacity="0.10"/>
+  <g filter="url(#shadow)">
+    <rect x="230" y="112" width="340" height="330" rx="36" fill="#fffdf7"/>
+    <rect x="230" y="112" width="340" height="108" rx="36" fill="#5b2a20"/>
+    <path d="M230 184h340v68H230z" fill="#5b2a20"/>
+    <circle cx="400" cy="296" r="82" fill="#c68045" stroke="#5b2a20" stroke-width="10"/>
+    <text x="400" y="323" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="62" font-weight="800" fill="#5b2a20">DT</text>
+    <text x="400" y="174" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="36" font-weight="800" fill="#ffffff">Nourish</text>
+    <text x="400" y="388" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="34" font-weight="800" fill="#26362b">Dates</text>
+    <text x="400" y="421" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="600" fill="#647067">Iron foods</text>
+  </g>
+  <ellipse cx="400" cy="475" rx="210" ry="28" fill="#17251c" opacity="0.14"/>
+  <g opacity="0.95">
+    <circle cx="176" cy="210" r="18" fill="#5b2a20"/>
+    <circle cx="625" cy="403" r="24" fill="#5b2a20" opacity="0.75"/>
+    <circle cx="154" cy="248" r="10" fill="#5b2a20" opacity="0.55"/>
+    <circle cx="650" cy="354" r="12" fill="#5b2a20" opacity="0.50"/>
+  </g>
+</svg>

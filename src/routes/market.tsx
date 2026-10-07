@@ -52,6 +52,51 @@ type CartItem = {
 };
 
 const CART_KEY = "nourishcare_market_cart";
+const PLATFORM_META: Record<
+  string,
+  { delivery: string; trust: string; accent: string; initials: string }
+> = {
+  Amazon: {
+    delivery: "2-4 day delivery",
+    trust: "Amazon partner link",
+    accent: "bg-[#ffedcc] text-[#7a4a00]",
+    initials: "A",
+  },
+  Blinkit: {
+    delivery: "10-20 min delivery",
+    trust: "Blinkit quick commerce",
+    accent: "bg-[#fff4b8] text-[#5f4b00]",
+    initials: "B",
+  },
+  BigBasket: {
+    delivery: "Same/next day slots",
+    trust: "BigBasket grocery",
+    accent: "bg-[#e8f6df] text-[#315d19]",
+    initials: "BB",
+  },
+  JioMart: {
+    delivery: "Store delivery slots",
+    trust: "JioMart grocery",
+    accent: "bg-[#e7f0ff] text-[#1d4f91]",
+    initials: "J",
+  },
+};
+
+function getPlatformMeta(platform: string) {
+  return (
+    PLATFORM_META[platform] ?? {
+      delivery: "Partner delivery",
+      trust: `${platform} partner link`,
+      accent: "bg-secondary text-secondary-foreground",
+      initials: platform.slice(0, 2).toUpperCase(),
+    }
+  );
+}
+
+function productRating(product: MarketProduct) {
+  const seed = [...product.name].reduce((sum, char) => sum + char.charCodeAt(0), 0);
+  return (4.2 + (seed % 7) / 10).toFixed(1);
+}
 
 function readCart(products: MarketProduct[]): CartItem[] {
   if (typeof window === "undefined") return [];
@@ -448,49 +493,86 @@ function ProductCard({
   onAdd: (product: MarketProduct) => void;
 }) {
   const available = product.stock_status.toLowerCase() === "in stock";
+  const platform = getPlatformMeta(product.platform);
+  const rating = productRating(product);
 
   return (
-    <Card className="rounded-3xl border-border shadow-soft">
-      <CardContent className="flex h-full flex-col p-6">
+    <Card className="overflow-hidden rounded-3xl border-border shadow-soft transition-shadow hover:shadow-lift">
+      <CardContent className="flex h-full flex-col p-0">
         <div className="relative aspect-[4/3] overflow-hidden rounded-2xl bg-secondary">
           <ProductImage product={product} />
-          <span className="absolute left-3 top-3 rounded-full bg-background/90 px-3 py-1 text-[11px] font-semibold uppercase tracking-wide shadow-soft">
+          <span
+            className={`absolute left-3 top-3 rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-wide shadow-soft ${platform.accent}`}
+          >
             {product.platform}
           </span>
+          <span className="absolute right-3 top-3 rounded-full bg-background/95 px-3 py-1 text-[11px] font-semibold text-foreground shadow-soft">
+            ★ {rating}
+          </span>
         </div>
-        <p className="mt-5 text-xs font-semibold uppercase tracking-wide text-primary">
-          {product.category}
-        </p>
-        <h3 className="mt-2 text-lg font-semibold">{product.name}</h3>
-        <p className="mt-2 flex-1 text-sm leading-relaxed text-muted-foreground">
-          {product.description}
-        </p>
-        <p className="mt-4 rounded-2xl bg-secondary/60 p-3 text-xs leading-relaxed text-muted-foreground">
-          {product.health_benefit}
-        </p>
-        <div className="mt-4 flex flex-wrap gap-2">
-          {product.nutrition_tags.slice(0, 3).map((tag) => (
-            <span key={tag} className="rounded-full border border-border px-2.5 py-1 text-[11px]">
-              {tag}
+        <div className="flex flex-1 flex-col p-6">
+          <div className="flex items-start justify-between gap-3">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-wide text-primary">
+                {product.category}
+              </p>
+              <h3 className="mt-2 text-lg font-semibold">{product.name}</h3>
+            </div>
+            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-secondary text-xs font-bold">
+              {platform.initials}
             </span>
-          ))}
-        </div>
-        <div className="mt-5 flex items-center justify-between gap-4">
-          <div>
-            <p className="font-display text-2xl font-semibold">Rs {product.price.toFixed(0)}</p>
-            <p className="text-xs text-muted-foreground">estimated · {product.unit}</p>
           </div>
-          <Button variant="soft" onClick={() => onAdd(product)} disabled={!available}>
-            <Plus className="h-4 w-4" />
-            Add
+
+          <p className="mt-2 flex-1 text-sm leading-relaxed text-muted-foreground">
+            {product.description}
+          </p>
+
+          <div className="mt-4 grid gap-2 rounded-2xl bg-secondary/60 p-3 text-xs">
+            <div className="flex justify-between gap-3">
+              <span className="text-muted-foreground">Delivery</span>
+              <span className="font-medium text-foreground">{platform.delivery}</span>
+            </div>
+            <div className="flex justify-between gap-3">
+              <span className="text-muted-foreground">Status</span>
+              <span
+                className={available ? "font-medium text-primary" : "font-medium text-destructive"}
+              >
+                {product.stock_status}
+              </span>
+            </div>
+            <div className="flex justify-between gap-3">
+              <span className="text-muted-foreground">Checkout</span>
+              <span className="font-medium text-foreground">{platform.trust}</span>
+            </div>
+          </div>
+
+          <p className="mt-4 rounded-2xl border border-border p-3 text-xs leading-relaxed text-muted-foreground">
+            {product.health_benefit}
+          </p>
+          <div className="mt-4 flex flex-wrap gap-2">
+            {product.nutrition_tags.slice(0, 3).map((tag) => (
+              <span key={tag} className="rounded-full border border-border px-2.5 py-1 text-[11px]">
+                {tag}
+              </span>
+            ))}
+          </div>
+          <div className="mt-5 flex items-center justify-between gap-4">
+            <div>
+              <p className="font-display text-2xl font-semibold">Rs {product.price.toFixed(0)}</p>
+              <p className="text-xs text-muted-foreground">estimated · {product.unit}</p>
+            </div>
+            <Button variant="soft" onClick={() => onAdd(product)} disabled={!available}>
+              <Plus className="h-4 w-4" />
+              Add
+            </Button>
+          </div>
+          <Button asChild variant="hero" className="mt-3 w-full" disabled={!product.product_url}>
+            <a href={product.product_url ?? "#"} target="_blank" rel="noreferrer">
+              Continue to {product.platform}
+              <ExternalLink className="h-4 w-4" />
+            </a>
           </Button>
         </div>
-        <Button asChild variant="hero" className="mt-3 w-full" disabled={!product.product_url}>
-          <a href={product.product_url ?? "#"} target="_blank" rel="noreferrer">
-            Buy on {product.platform}
-            <ExternalLink className="h-4 w-4" />
-          </a>
-        </Button>
       </CardContent>
     </Card>
   );

@@ -137,52 +137,52 @@ PRODUCT_MEDIA = {
     "Ragi Flour": {
         "platform": "Amazon",
         "product_url": "https://www.amazon.in/s?k=ragi+flour",
-        "image_url": "https://source.unsplash.com/800x600/?ragi,flour,millet",
+        "image_url": "/market-products/ragi-flour.png",
     },
     "Roasted Chana": {
         "platform": "Blinkit",
         "product_url": "https://blinkit.com/s/?q=roasted%20chana",
-        "image_url": "https://source.unsplash.com/800x600/?roasted,chickpeas",
+        "image_url": "/market-products/roasted-chana.png",
     },
     "Soy Chunks": {
         "platform": "BigBasket",
         "product_url": "https://www.bigbasket.com/ps/?q=soy%20chunks",
-        "image_url": "https://source.unsplash.com/800x600/?soy,chunks,protein",
+        "image_url": "/market-products/soy-chunks.png",
     },
     "Moong Dal": {
         "platform": "JioMart",
         "product_url": "https://www.jiomart.com/search/moong%20dal",
-        "image_url": "https://source.unsplash.com/800x600/?lentils,dal",
+        "image_url": "/market-products/moong-dal.png",
     },
     "Dates": {
         "platform": "Amazon",
         "product_url": "https://www.amazon.in/s?k=dates",
-        "image_url": "https://source.unsplash.com/800x600/?dates,dryfruit",
+        "image_url": "/market-products/dates.png",
     },
     "Sesame Seeds": {
         "platform": "BigBasket",
         "product_url": "https://www.bigbasket.com/ps/?q=sesame%20seeds",
-        "image_url": "https://source.unsplash.com/800x600/?sesame,seeds",
+        "image_url": "/market-products/sesame-seeds.png",
     },
     "Makhana": {
         "platform": "Blinkit",
         "product_url": "https://blinkit.com/s/?q=makhana",
-        "image_url": "https://source.unsplash.com/800x600/?makhana,foxnuts",
+        "image_url": "/market-products/makhana.png",
     },
     "Peanut Jaggery Chikki": {
         "platform": "JioMart",
         "product_url": "https://www.jiomart.com/search/chikki",
-        "image_url": "https://source.unsplash.com/800x600/?peanut,chikki",
+        "image_url": "/market-products/peanut-chikki.png",
     },
     "Curd Starter Kit": {
         "platform": "Amazon",
         "product_url": "https://www.amazon.in/s?k=curd+starter+culture",
-        "image_url": "https://source.unsplash.com/800x600/?curd,yogurt",
+        "image_url": "/market-products/curd-starter.png",
     },
     "Mixed Nuts Mini Pack": {
         "platform": "BigBasket",
         "product_url": "https://www.bigbasket.com/ps/?q=mixed%20nuts",
-        "image_url": "https://source.unsplash.com/800x600/?mixed,nuts",
+        "image_url": "/market-products/mixed-nuts.png",
     },
 }
 
@@ -206,9 +206,9 @@ def seed_content():
     for product in MarketProduct.query.all():
         media = PRODUCT_MEDIA.get(product.name)
         if media:
-            product.platform = product.platform or media["platform"]
-            product.product_url = product.product_url or media["product_url"]
-            product.image_url = product.image_url or media["image_url"]
+            product.platform = media["platform"]
+            product.product_url = media["product_url"]
+            product.image_url = media["image_url"]
     db.session.commit()
 
 

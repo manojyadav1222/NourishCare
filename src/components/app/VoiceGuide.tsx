@@ -54,27 +54,46 @@ declare global {
 
 const LANGUAGE_OPTIONS = [
   { value: "en-IN", label: "English" },
-  { value: "hi-IN", label: "Hindi / Hinglish" },
-  { value: "te-IN", label: "Telugu / Tanglish" },
+  { value: "hi-IN", label: "Hindi / हिंदी" },
+  { value: "te-IN", label: "Telugu / తెలుగు" },
+  { value: "ta-IN", label: "Tamil / தமிழ்" },
 ];
 
-const STARTER_PROMPTS = [
-  "Show iron-rich foods",
+const DEFAULT_STARTER_PROMPTS = [
   "What should I eat for protein?",
-  "Help me drink more water",
+  "Calculate BMI for height 170 and weight 70",
+  "Show iron-rich foods",
 ];
+
+const STARTER_PROMPTS: Record<string, string[]> = {
+  "en-IN": DEFAULT_STARTER_PROMPTS,
+  "hi-IN": [
+    "Protein ke liye kya khau?",
+    "Height 170 weight 70 ka BMI batao",
+    "Iron rich foods dikhao",
+  ],
+  "te-IN": ["Protein kosam emi tināli?", "Height 170 weight 70 BMI cheppu", "Iron foods chupinchu"],
+  "ta-IN": ["Protein ku enna sapidanum?", "Height 170 weight 70 BMI sollu", "Iron foods kaatu"],
+};
+
+type ChatMessage = {
+  role: "user" | "assistant";
+  text: string;
+};
 
 export function VoiceGuide() {
   const [open, setOpen] = useState(false);
   const [language, setLanguage] = useState("en-IN");
   const [question, setQuestion] = useState("");
   const [answer, setAnswer] = useState(
-    "Ask me about nutrition, BMI, water, healthy habits, meal plans or Nourish Market foods.",
+    "Ask me about nutrition, BMI, water, healthy habits, meal plans or Nourish Market foods. I can reply in English, Hindi, Telugu or Tamil.",
   );
   const [actions, setActions] = useState<AssistantAction[]>([
     { label: "Open Nourish Market", to: "/market" },
     { label: "Create meal plan", to: "/meal-planner" },
   ]);
+  const [suggestions, setSuggestions] = useState<string[]>(DEFAULT_STARTER_PROMPTS);
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [loading, setLoading] = useState(false);
   const [listening, setListening] = useState(false);
   const recognitionRef = useRef<SpeechRecognitionLike | null>(null);
@@ -96,6 +115,16 @@ export function VoiceGuide() {
       const result = await assistantApi.chat({ message: cleanQuestion, language });
       setAnswer(result.answer);
       setActions(result.actions);
+      setSuggestions(
+        result.suggestions?.length
+          ? result.suggestions
+          : (STARTER_PROMPTS[language] ?? DEFAULT_STARTER_PROMPTS),
+      );
+      setMessages((items) => [
+        ...items.slice(-5),
+        { role: "user", text: cleanQuestion },
+        { role: "assistant", text: result.answer },
+      ]);
       setQuestion("");
       speak(result.answer, result.language);
     } catch (error) {
@@ -183,7 +212,7 @@ export function VoiceGuide() {
             </div>
             <SheetTitle className="font-display text-2xl">NourishCare Voice Guide</SheetTitle>
             <SheetDescription>
-              Ask in English, Hindi/Hinglish or Telugu/Tanglish for quick nutrition guidance.
+              Ask in English, Hindi, Telugu or Tamil for quick nutrition guidance.
             </SheetDescription>
           </SheetHeader>
 
@@ -192,7 +221,13 @@ export function VoiceGuide() {
               <Languages className="h-4 w-4" />
               Local language
             </Label>
-            <Select value={language} onValueChange={setLanguage}>
+            <Select
+              value={language}
+              onValueChange={(value) => {
+                setLanguage(value);
+                setSuggestions(STARTER_PROMPTS[value] ?? DEFAULT_STARTER_PROMPTS);
+              }}
+            >
               <SelectTrigger id="voice-language">
                 <SelectValue />
               </SelectTrigger>
@@ -209,6 +244,23 @@ export function VoiceGuide() {
           <div className="rounded-2xl border bg-muted/30 p-4">
             <p className="text-sm leading-6 text-foreground">{answer}</p>
           </div>
+
+          {messages.length ? (
+            <div className="max-h-52 space-y-2 overflow-y-auto rounded-2xl border bg-background p-3">
+              {messages.map((message, index) => (
+                <div
+                  key={`${message.role}-${index}`}
+                  className={
+                    message.role === "user"
+                      ? "ml-8 rounded-2xl bg-primary px-3 py-2 text-sm text-primary-foreground"
+                      : "mr-8 rounded-2xl bg-muted px-3 py-2 text-sm leading-5 text-foreground"
+                  }
+                >
+                  {message.text}
+                </div>
+              ))}
+            </div>
+          ) : null}
 
           <div className="flex flex-wrap gap-2">
             {actions.map((action) => (
@@ -266,7 +318,7 @@ export function VoiceGuide() {
               Try asking
             </p>
             <div className="grid gap-2">
-              {STARTER_PROMPTS.map((prompt) => (
+              {suggestions.map((prompt) => (
                 <Button
                   key={prompt}
                   type="button"

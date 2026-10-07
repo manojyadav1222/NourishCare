@@ -114,8 +114,10 @@ export type AssistantAction = {
 export type AssistantResponse = {
   answer: string;
   language: string;
+  language_name?: string;
   topic: string;
   actions: AssistantAction[];
+  suggestions?: string[];
 };
 
 export class ApiError extends Error {
